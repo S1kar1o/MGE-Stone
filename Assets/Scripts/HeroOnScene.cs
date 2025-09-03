@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,11 +49,17 @@ public class HeroOnScene : MonoBehaviour
     {
         if (damage >= int.Parse(Hp.text))
         {
-            //Lose
+            //Lose/
         }
         else
         {
+            animator.SetTrigger("GetDamage");
             Hp.text = (int.Parse(Hp.text) - damage).ToString();
+           /* while (!animator.GetCurrentAnimatorStateInfo(0).IsName("GetDamage"))
+                await Task.Yield();
+
+            while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+                await Task.Yield();*/
         }
 
     }

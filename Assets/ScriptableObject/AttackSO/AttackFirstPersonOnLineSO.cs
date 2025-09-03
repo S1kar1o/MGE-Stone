@@ -17,8 +17,7 @@ public class AttackFirstPersonOnLineSO : AttackActionSO
                 if (unitOnScene.fraction != attackerUnitOnScene.fraction && int.Parse(unitOnScene.Hp.text) > 0)
                 {
                     await unitOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
-                    Debug.Log(unitOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(unitOnScene.transform);
 
                     enemyInRow = true;
                     break;
@@ -31,18 +30,16 @@ public class AttackFirstPersonOnLineSO : AttackActionSO
                     Transform owerHeroes = GameManager.Instance.GetOwerHeroes();
                     HeroOnScene owerHeroesOnScene = owerHeroes.GetComponent<HeroOnScene>();
                     owerHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(owerHeroes.transform);
 
-                    Debug.Log(owerHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
                 }
                 else
                 {
                     Transform enemyHeroes = GameManager.Instance.GetEnemyHeroes();
                     HeroOnScene enemyHeroesOnScene = enemyHeroes.GetComponent<HeroOnScene>();
                     enemyHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(enemyHeroes.transform);
 
-                    Debug.Log(enemyHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
 
                 }
             }

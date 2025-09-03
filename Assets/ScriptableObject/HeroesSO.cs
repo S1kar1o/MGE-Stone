@@ -13,5 +13,4 @@ public class HeroesSO : ScriptableObject
     public Transform HeroPref;
     public Fraction Fraction;
     public RuntimeAnimatorController animatorController;
-
 }

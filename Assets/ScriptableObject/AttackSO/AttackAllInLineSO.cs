@@ -19,7 +19,7 @@ public class AttackAllInLineSO : AttackActionSO
                 {
                     await unitOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
                     enemyInRow = true;
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(unitOnScene.transform);
 
                 }
             }
@@ -30,7 +30,7 @@ public class AttackAllInLineSO : AttackActionSO
                     Transform owerHeroes = GameManager.Instance.GetOwerHeroes();
                     HeroOnScene owerHeroesOnScene = owerHeroes.GetComponent<HeroOnScene>();
                     owerHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(owerHeroes.transform);
 
                     Debug.Log(owerHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
                 }
@@ -40,7 +40,7 @@ public class AttackAllInLineSO : AttackActionSO
                     HeroOnScene enemyHeroesOnScene = enemyHeroes.GetComponent<HeroOnScene>();
 
                     enemyHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
-                    await attackerUnitOnScene.PlayAttackAnimation();
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(enemyHeroes.transform);
 
                     Debug.Log(enemyHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
 

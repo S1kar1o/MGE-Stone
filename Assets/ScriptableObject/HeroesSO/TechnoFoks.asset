@@ -18,4 +18,4 @@ MonoBehaviour:
   Name: TechnoFoks
   HeroPref: {fileID: 0}
   Fraction: 1
-  animatorController: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: da4afa9e4344e3f479731601a1c4ac61, type: 2}

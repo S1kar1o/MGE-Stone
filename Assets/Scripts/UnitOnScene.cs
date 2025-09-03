@@ -1,3 +1,5 @@
+using DG.Tweening;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -49,22 +51,68 @@ public class UnitOnScene : MonoBehaviour
     {
        await attackAction.Execute(gameObject);
     }
-    public async Task PlayAttackAnimation()
+    public async Task PlayAttackAnimationWithMove(Transform target)
     {
         if (animatorController == null)
             animatorController = GetComponent<Animator>();
 
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = target.position;
+
+        // Запускаємо тригерну анімацію
+        var triggerAnimTask = PlayTriggerAnimation();
+
+        // Запускаємо рух вперед-назад
+        var moveAnimTask = MoveWithDOTween(startPos, targetPos);
+       /* Task animationOfGetDamageHero = null;
+
+        if (heroe != null)
+        {
+            animationOfGetDamageHero = heroe.GetDamage(int.Parse(Damage.text));
+        }
+
+        // Чекаємо всі анімації, тільки якщо вони не null
+        var tasks = new List<Task> { triggerAnimTask, moveAnimTask };
+        if (animationOfGetDamageHero != null)
+            tasks.Add(animationOfGetDamageHero);*/
+
+        await Task.WhenAll(triggerAnimTask, moveAnimTask);
+
+        Debug.Log(name + ": Attack animation (trigger + move) finished");
+    }
+
+    private async Task PlayTriggerAnimation()
+    {
         animatorController.SetTrigger("Attack");
-        Debug.Log(name + ": Attack Trigger set");
 
-        // Чекаємо, поки аніматор увійде у стан "Attack"
-        while (!animatorController.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        // Отримуємо hash потрібного стейта
+        int attackHash = Animator.StringToHash("Base Layer.Attack");
+
+        // Чекаємо поки ми ввійдемо у цей стейт
+        while (animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash != attackHash)
             await Task.Yield();
 
-        // Чекаємо, поки анімація закінчиться
-        while (animatorController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+        // Чекаємо завершення анімації
+        while (animatorController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f &&
+               animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash == attackHash)
+        {
             await Task.Yield();
+        }
+    }
 
-        Debug.Log(name + ": Attack animation finished");
+
+    private async Task MoveWithDOTween(Vector3 startPos, Vector3 targetPos)
+    {
+        float duration = 0.25f; // швидкість підльоту
+        float pause = 0.1f;     // затримка на ударі
+
+        Vector3 vector3 = new Vector3(startPos.x, targetPos.y, targetPos.z);
+        // Tween вперед
+        await transform.DOMove(vector3, duration).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
+
+        await Task.Delay((int)(pause * 1000)); // невелика пауза
+        // Tween назад
+        await transform.DOMove(startPos, duration).SetEase(Ease.InQuad).AsyncWaitForCompletion();
+        Debug.Log(12121);
     }
 }
