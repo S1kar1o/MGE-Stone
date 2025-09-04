@@ -13,7 +13,12 @@ public class UnitOnScene : MonoBehaviour
     public TextMeshProUGUI Damage;
     public TextMeshProUGUI Hp;
     public Fraction fraction;
-    [SerializeField] public Animator animatorController;
+    [SerializeField] private Animator animatorController;
+    private const string ATTACK_TRIGER_ANIMATION = "Attack";
+    private const string HEALING_TRIGER_ANIMATION = "GetHealing";
+    private const string GET_DAMAGE_TRIGER = "GetDamage";
+    private const string DEATH_TRIGER = "Death";
+    [SerializeField] private CardBurnEffect cardBurnEffectScript;
     public void Initialize()
     {
         if (cardData != null)
@@ -30,26 +35,48 @@ public class UnitOnScene : MonoBehaviour
         if (damage >= int.Parse(Hp.text))
         {
             Hp.text = 0.ToString();
+            // Запускаємо обидві анімації паралельно
+            await Task.WhenAll(
+                PlayTriggerAnimation(DEATH_TRIGER),
+                cardBurnEffectScript.StartBurnAsync()
+            );
             DestroyCard();
         }
         else
         {
             Hp.text = (int.Parse(Hp.text) - damage).ToString();
+            await PlayTriggerAnimation(GET_DAMAGE_TRIGER);
         }
 
     }
-    public void DestroyCard()
+    public async void DestroyCard()
     {
         Transform lineTransform = gameObject.transform.parent;
-        LineScript lineScript=lineTransform.GetComponent<LineScript>();
-        if(fraction==GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction )
+        LineScript lineScript = lineTransform.GetComponent<LineScript>();
+        if (fraction == GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction)
             lineScript.RemoveHero(gameObject.transform);
-        lineScript.UpdateHeroPositions();
+        await Task.Yield();
         Destroy(gameObject);
+    }
+    public async Task GetHealth(Transform target)
+    {
+        /*if (animatorController == null)
+            animatorController = GetComponent<Animator>();
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = target.position;
+
+        // Запускаємо тригерну анімацію
+        var triggerAnimTask = PlayTriggerAnimation(HEALING_TRIGER_ANIMATION);
+
+        // Запускаємо рух вперед-назад
+        var moveAnimTask = MoveWithDOTween(startPos, targetPos, target);
+        await Task.WhenAll(triggerAnimTask, moveAnimTask);*/
     }
     public async Task Attack()
     {
-       await attackAction.Execute(gameObject);
+        if (int.Parse(Hp.text) <= 0) return; // мертвий — не атакує
+        await attackAction.Execute(gameObject);
     }
     public async Task PlayAttackAnimationWithMove(Transform target)
     {
@@ -60,34 +87,25 @@ public class UnitOnScene : MonoBehaviour
         Vector3 targetPos = target.position;
 
         // Запускаємо тригерну анімацію
-        var triggerAnimTask = PlayTriggerAnimation();
+        var triggerAnimTask = PlayTriggerAnimation(ATTACK_TRIGER_ANIMATION);
 
         // Запускаємо рух вперед-назад
-        var moveAnimTask = MoveWithDOTween(startPos, targetPos);
-       /* Task animationOfGetDamageHero = null;
-
-        if (heroe != null)
-        {
-            animationOfGetDamageHero = heroe.GetDamage(int.Parse(Damage.text));
-        }
-
-        // Чекаємо всі анімації, тільки якщо вони не null
-        var tasks = new List<Task> { triggerAnimTask, moveAnimTask };
-        if (animationOfGetDamageHero != null)
-            tasks.Add(animationOfGetDamageHero);*/
+        var moveAnimTask = MoveWithDOTween(startPos, targetPos, target);
 
         await Task.WhenAll(triggerAnimTask, moveAnimTask);
+
 
         Debug.Log(name + ": Attack animation (trigger + move) finished");
     }
 
-    private async Task PlayTriggerAnimation()
+    private async Task PlayTriggerAnimation(string nameOfTrigger)
     {
-        animatorController.SetTrigger("Attack");
+        animatorController.SetTrigger(nameOfTrigger);
 
         // Отримуємо hash потрібного стейта
-        int attackHash = Animator.StringToHash("Base Layer.Attack");
+        int attackHash = Animator.StringToHash("Base Layer." + nameOfTrigger);
 
+        Debug.Log($"{nameOfTrigger}: {attackHash}");
         // Чекаємо поки ми ввійдемо у цей стейт
         while (animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash != attackHash)
             await Task.Yield();
@@ -101,7 +119,7 @@ public class UnitOnScene : MonoBehaviour
     }
 
 
-    private async Task MoveWithDOTween(Vector3 startPos, Vector3 targetPos)
+    private async Task MoveWithDOTween(Vector3 startPos, Vector3 targetPos, Transform target)
     {
         float duration = 0.25f; // швидкість підльоту
         float pause = 0.1f;     // затримка на ударі
@@ -110,9 +128,23 @@ public class UnitOnScene : MonoBehaviour
         // Tween вперед
         await transform.DOMove(vector3, duration).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
 
-        await Task.Delay((int)(pause * 1000)); // невелика пауза
+        UnitOnScene enemy = target.GetComponent<UnitOnScene>();
+        Task animationOfGetDamageByEnemy = null;
+
+        if (enemy != null)
+        {
+            animationOfGetDamageByEnemy = enemy.GetDamage(int.Parse(Damage.text));
+        }
+
+
+        await Task.Delay((int)(pause * 1000));
+        // невелика пауза
         // Tween назад
         await transform.DOMove(startPos, duration).SetEase(Ease.InQuad).AsyncWaitForCompletion();
-        Debug.Log(12121);
+
+        if (animationOfGetDamageByEnemy != null)
+        {
+            await animationOfGetDamageByEnemy;
+        }
     }
 }

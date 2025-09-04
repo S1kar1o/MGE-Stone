@@ -1,22 +1,36 @@
 ﻿using UnityEngine;
+using static TurnManager;
 
 public class OponentHandPanel : MonoBehaviour
 {
     [SerializeField] private float maxSpacing = 200f; // відстань при малій кількості карт
     [SerializeField] private float minSpacing = 30f;  // мінімальна відстань, коли карт багато
-
+    [SerializeField] private Transform enemyCardPref;
     private RectTransform panel;
 
     private void Awake()
     {
         panel = GetComponent<RectTransform>();
+        TurnManager.Instance.TurnChanged += On_TurnChanged;
     }
-
-    private void Update()
+    private void Start()
     {
         AlignChildren();
     }
+    private void On_TurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
+    {
+        if(e.state== TurnState.EnemySpawning)
+        {
+            TryAddCardToEnemyHand();
+            AlignChildren();
+        }
+    }
 
+    public void TryAddCardToEnemyHand()
+    {
+        Instantiate(enemyCardPref,transform);
+    }
+  
     private void AlignChildren()
     {
         int count = transform.childCount;

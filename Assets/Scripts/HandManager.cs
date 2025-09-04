@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using static TurnManager;
 
 public class HandManager : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class HandManager : MonoBehaviour
     public float minOffset = 50f;
     public float moveDuration = 0.2f;
     public static HandManager Instance;
+    public UnitsSOList unitSOList;
+    public GameObject cardPrefab;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -17,6 +21,29 @@ public class HandManager : MonoBehaviour
         }
         Instance = this;
     }
+    private void Start()
+    {
+        TurnManager.Instance.TurnChanged += On_TurnChanged;
+    }
+    private void On_TurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
+    {
+        if(e.state== TurnState.YourSpawning)
+        {
+            DrawCard();
+        }
+    }
+
+    public void DrawCard()
+    {
+        CardInHand card = Instantiate(cardPrefab, transform).GetComponent<CardInHand>();
+        int index = Random.Range(0, unitSOList.UnitsSoList.Count);
+        UnitSO randomUnit = unitSOList.UnitsSoList[index];
+        card.cardData = randomUnit; // прив’язуємо дані
+        card.Initialize();
+
+        UpdateHand();
+    }
+
     public void UpdateHand()
     {
         int cardCount = transform.childCount;
