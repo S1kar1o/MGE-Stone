@@ -44,7 +44,10 @@ public class LineScript : MonoBehaviour
     {
         UpdateHeroPositions();
     }
-
+    public bool CheckPosibilityToAddACard()
+    {
+        return heroOnLine < 2;
+    }
 
     public void UpdateHeroPositions()
     {

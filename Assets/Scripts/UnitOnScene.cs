@@ -58,20 +58,28 @@ public class UnitOnScene : MonoBehaviour
         await Task.Yield();
         Destroy(gameObject);
     }
-    public async Task GetHealth(Transform target)
+    public async Task GiveHealth(Transform target)
     {
-        /*if (animatorController == null)
+        if (animatorController == null)
             animatorController = GetComponent<Animator>();
 
         Vector3 startPos = transform.position;
         Vector3 targetPos = target.position;
 
         // Запускаємо тригерну анімацію
-        var triggerAnimTask = PlayTriggerAnimation(HEALING_TRIGER_ANIMATION);
-
         // Запускаємо рух вперед-назад
         var moveAnimTask = MoveWithDOTween(startPos, targetPos, target);
-        await Task.WhenAll(triggerAnimTask, moveAnimTask);*/
+        var triggerAnimTask = PlayTriggerAnimation(HEALING_TRIGER_ANIMATION);
+
+        target.GetComponent<UnitOnScene>().GetHealth(int.Parse(Damage.text));
+        await Task.WhenAll(triggerAnimTask, moveAnimTask);
+    }
+    public void GetHealth(int healAmount)
+    {
+        if (int.Parse(Hp.text)>0)
+        {
+            Hp.text = (int.Parse(Hp.text) + healAmount).ToString();
+        }
     }
     public async Task Attack()
     {
