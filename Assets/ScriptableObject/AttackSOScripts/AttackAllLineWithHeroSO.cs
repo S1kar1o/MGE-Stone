@@ -29,7 +29,6 @@ public class AttackAllLineWithHeroSO : AttackActionSO
                 owerHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
                 await attackerUnitOnScene.PlayAttackAnimationWithMove(owerHeroes.transform);
 
-                Debug.Log(owerHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
             }
             else
             {
@@ -39,7 +38,6 @@ public class AttackAllLineWithHeroSO : AttackActionSO
                 enemyHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
                 await attackerUnitOnScene.PlayAttackAnimationWithMove(enemyHeroes.transform);
 
-                Debug.Log(enemyHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
 
             }
 

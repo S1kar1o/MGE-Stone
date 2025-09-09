@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: MGEUnitsSOList
   m_EditorClassIdentifier: 
   UnitsSoList:
-  - {fileID: 11400000, guid: ce72db0d0a9e0904a8efbe5c0d63384a, type: 2}
   - {fileID: 11400000, guid: cdb767156f4b6f44bb168e2b35a28680, type: 2}
+  - {fileID: 11400000, guid: 1c32f84d02aec6b44bca43b1b69ac1a1, type: 2}
+  - {fileID: 11400000, guid: ce72db0d0a9e0904a8efbe5c0d63384a, type: 2}
+  - {fileID: 11400000, guid: 13af1606f81814a4e93eb0fc46215e52, type: 2}

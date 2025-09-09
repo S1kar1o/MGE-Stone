@@ -9,10 +9,12 @@ public class UnitOnScene : MonoBehaviour
 {
     public UnitSO cardData; // посилання на ScriptableObject
     [SerializeField] private AttackActionSO attackAction;
+    [SerializeField] private AttackActionSO actionOnStart;
     public Image cardImage;
     public TextMeshProUGUI Damage;
     public TextMeshProUGUI Hp;
     public Fraction fraction;
+
     [SerializeField] private Animator animatorController;
     private const string ATTACK_TRIGER_ANIMATION = "Attack";
     private const string HEALING_TRIGER_ANIMATION = "GetHealing";
@@ -28,7 +30,16 @@ public class UnitOnScene : MonoBehaviour
             Hp.text = cardData.Hp.ToString();
             fraction = cardData.Fraction;
             attackAction = cardData.attackAction;
+            actionOnStart = cardData.actionOnStart;
         }
+        if (actionOnStart != null)
+        {
+            actionOnStart.Execute(gameObject);
+        }
+    }
+    public void boostDamage(int damageBoost) {
+        Damage.text = (int.Parse(Damage.text)+ damageBoost).ToString();
+        //start anim Boost Damage
     }
     public async Task GetDamage(int damage)
     {
@@ -40,7 +51,7 @@ public class UnitOnScene : MonoBehaviour
                 PlayTriggerAnimation(DEATH_TRIGER),
                 cardBurnEffectScript.StartBurnAsync()
             );
-            DestroyCard();
+            await DestroyCard();
         }
         else
         {
@@ -49,13 +60,14 @@ public class UnitOnScene : MonoBehaviour
         }
 
     }
-    public async void DestroyCard()
+    public async Task DestroyCard()
     {
         Transform lineTransform = gameObject.transform.parent;
         LineScript lineScript = lineTransform.GetComponent<LineScript>();
         if (fraction == GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction)
             lineScript.RemoveHero(gameObject.transform);
-        await Task.Yield();
+        transform.SetParent(null);
+        await lineScript.UpdateHeroPositions();
         Destroy(gameObject);
     }
     public async Task GiveHealth(Transform target)
@@ -76,7 +88,7 @@ public class UnitOnScene : MonoBehaviour
     }
     public void GetHealth(int healAmount)
     {
-        if (int.Parse(Hp.text)>0)
+        if (int.Parse(Hp.text) > 0)
         {
             Hp.text = (int.Parse(Hp.text) + healAmount).ToString();
         }
@@ -132,7 +144,7 @@ public class UnitOnScene : MonoBehaviour
         float duration = 0.25f; // швидкість підльоту
         float pause = 0.1f;     // затримка на ударі
 
-        Vector3 vector3 = new Vector3(startPos.x, targetPos.y, targetPos.z);
+        Vector3 vector3 = new Vector3(startPos.x, targetPos.y, startPos.z);
         // Tween вперед
         await transform.DOMove(vector3, duration).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
 
@@ -146,7 +158,7 @@ public class UnitOnScene : MonoBehaviour
 
 
         await Task.Delay((int)(pause * 1000));
-        // невелика пауза
+        //  пауза
         // Tween назад
         await transform.DOMove(startPos, duration).SetEase(Ease.InQuad).AsyncWaitForCompletion();
 

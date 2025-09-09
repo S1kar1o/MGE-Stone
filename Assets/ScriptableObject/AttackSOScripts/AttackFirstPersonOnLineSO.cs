@@ -42,8 +42,6 @@ public class AttackFirstPersonOnLineSO : AttackActionSO
 
                 }
             }
-            enemyInRow = false;
-
         }
     }
 }

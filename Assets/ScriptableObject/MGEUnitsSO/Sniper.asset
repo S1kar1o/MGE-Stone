@@ -20,4 +20,6 @@ MonoBehaviour:
   UnitPref: {fileID: 6660218741132165414, guid: 0c2dcdbf4ffcc1b4f865e10f882eec00, type: 3}
   HeroDescription: 12
   Fraction: 0
+  Type: 2
   attackAction: {fileID: 11400000, guid: 71edf34b448e1cd42a9ef0da41693c0b, type: 2}
+  actionOnStart: {fileID: 0}

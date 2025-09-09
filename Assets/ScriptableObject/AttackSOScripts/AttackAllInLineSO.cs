@@ -31,7 +31,6 @@ public class AttackAllInLineSO : AttackActionSO
                     owerHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
                     await attackerUnitOnScene.PlayAttackAnimationWithMove(owerHeroes.transform);
 
-                    Debug.Log(owerHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
                 }
                 else
                 {
@@ -41,11 +40,9 @@ public class AttackAllInLineSO : AttackActionSO
                     enemyHeroesOnScene.GetDamage(int.Parse(attackerUnitOnScene.Damage.text));
                     await attackerUnitOnScene.PlayAttackAnimationWithMove(enemyHeroes.transform);
 
-                    Debug.Log(enemyHeroesOnScene.name + int.Parse(attackerUnitOnScene.Damage.text));
 
                 }
             }
-            enemyInRow = true;
 
         }
     }

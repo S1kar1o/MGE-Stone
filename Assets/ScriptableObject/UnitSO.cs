@@ -11,9 +11,18 @@ public class UnitSO : ScriptableObject
     public Transform UnitPref;
     public string HeroDescription;
     public Fraction Fraction;
+    public Type Type;
     public AttackActionSO attackAction;
+    public AttackActionSO actionOnStart;
+
 }
 public enum Fraction{
     MGE,
     Furry,
+}
+public enum Type{
+    Tank,
+    None,
+    DamageDealer,
+    Support,
 }

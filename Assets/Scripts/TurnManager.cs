@@ -77,7 +77,6 @@ public class TurnManager : MonoBehaviour
         };
 
         currentState = turnQueue[currentIndex];
-        Debug.Log("Current Turn: " + currentState);
 
         // Після закінчення поточного ходу викликаємо наступний
         TurnChanged?.Invoke(this, new OnStateChangedEventArgs { state = currentState });

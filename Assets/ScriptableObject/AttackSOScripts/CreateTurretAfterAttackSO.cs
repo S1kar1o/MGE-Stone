@@ -6,9 +6,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "AttackActions/CreateTurretAfterAttackSO")]
 public class CreateTurretAfterAttackSO : AttackActionSO
 {
-    public Transform cardPref;
     public UnitSO objectForSpawnData;
-    bool IsSpawned;
+    bool IsSpawned=false;
     public override async Task Execute(GameObject attacker)
     {
         Transform lineTransform = attacker.transform.parent;
@@ -16,10 +15,8 @@ public class CreateTurretAfterAttackSO : AttackActionSO
         LineScript lineScript = lineTransform.GetComponent<LineScript>();
         if (lineScript.CheckPosibilityToAddACard())
         {
-            Transform card = Instantiate(cardPref);
-            CardInHand cardInHand = card.GetComponent<CardInHand>();
-            cardInHand.cardData = objectForSpawnData;
-            lineScript.TryAddCardOnLine(card);
+           
+            lineScript.TryAddCardOnLine(objectForSpawnData);
         }
     }
 }

@@ -1,5 +1,6 @@
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -17,8 +18,7 @@ public class LineScript : MonoBehaviour
             Debug.LogError("LineScript requires a BoxCollider2D component!");
         }
     }
-
-    public bool TryAddCardOnLine(UnityEngine.Transform card)
+    public bool TryAddCardOnLine(UnitSO unitSO)
     {
         if (heroOnLine >= 2)
         {
@@ -26,30 +26,37 @@ public class LineScript : MonoBehaviour
             return false;
         }
 
-        CardInHand cardInHand = card.GetComponent<CardInHand>();
-        UnityEngine.Transform unitOnSceneTransform = Instantiate(cardInHand.cardData.UnitPref);
+
+        UnityEngine.Transform unitOnSceneTransform = Instantiate(unitSO.UnitPref);
         UnitOnScene unitOnScene = unitOnSceneTransform.GetComponent<UnitOnScene>();
-        unitOnScene.cardData = cardInHand.cardData;
+        unitOnScene.cardData = unitSO;
         unitOnSceneTransform.SetParent(transform, false);
 
         heroOnLine++;
         unitOnScene.Initialize();
-
-        UpdateHeroPositions();
+        List<Transform> allies = new List<Transform>();
+        foreach (Transform transform in transform)
+        {
+            if (transform.GetComponent<UnitOnScene>().cardData.Fraction == unitSO.Fraction)
+            {
+                allies.Add(transform);
+            }
+        }
+        allies = allies.OrderBy(x => (int)x.GetComponent<UnitOnScene>().cardData.Type).ToList();
+        for (int i = 0; i < allies.Count; i++)
+        {
+            allies[i].SetSiblingIndex(i); // ставимо на відповідний індекс
+        }
+        _ = UpdateHeroPositions();
 
         return true;
-    }
-
-    private void Start()
-    {
-        UpdateHeroPositions();
     }
     public bool CheckPosibilityToAddACard()
     {
         return heroOnLine < 2;
     }
 
-    public void UpdateHeroPositions()
+    public async Task UpdateHeroPositions()
     {
         if (heroOnLine == 0) return;
 
@@ -71,12 +78,13 @@ public class LineScript : MonoBehaviour
 
         if (enemies.Count == 1)
         {
-            enemies[0].DOLocalMove(enemyPositionOnLine[0], 0.3f).SetEase(Ease.OutQuad);
+            await enemies[0].DOLocalMove(enemyPositionOnLine[0], 0.3f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
         }
         else if (enemies.Count == 2)
         {
-            enemies[0].DOLocalMove(enemyPositionOnLine[1], 0.3f).SetEase(Ease.OutQuad);
-            enemies[1].DOLocalMove(enemyPositionOnLine[2], 0.3f).SetEase(Ease.OutQuad);
+            var tween1 = enemies[0].DOLocalMove(enemyPositionOnLine[1], 0.3f).SetEase(Ease.OutQuad);
+            var tween2 = enemies[1].DOLocalMove(enemyPositionOnLine[2], 0.3f).SetEase(Ease.OutQuad);
+            await Task.WhenAll(tween1.AsyncWaitForCompletion(), tween2.AsyncWaitForCompletion());
         }
 
         // === Союзні герої ===
@@ -94,33 +102,36 @@ public class LineScript : MonoBehaviour
 
         if (allies.Count == 1)
         {
-            allies[0].DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
+            await allies[0].DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
         }
         else if (allies.Count == 2)
         {
             float offset = halfHeight / 2f;
-            allies[0].DOLocalMove(new Vector3(0, offset, 0), 0.3f).SetEase(Ease.OutQuad);
-            allies[1].DOLocalMove(new Vector3(0, -offset, 0), 0.3f).SetEase(Ease.OutQuad);
+            var tween1 = allies[0].DOLocalMove(new Vector3(0, offset, 0), 0.3f).SetEase(Ease.OutQuad);
+            var tween2 = allies[1].DOLocalMove(new Vector3(0, -offset, 0), 0.3f).SetEase(Ease.OutQuad);
+            await Task.WhenAll(tween1.AsyncWaitForCompletion(), tween2.AsyncWaitForCompletion());
         }
     }
-
     public async Task StartAttack()
     {
-        foreach (UnityEngine.Transform child in transform)
+        var allUnits = new List<UnitOnScene>();
+        foreach (Transform child in transform)
         {
-            if (child.GetComponent<UnitOnScene>() != null && child.GetComponent<UnitOnScene>().fraction == Fraction.MGE)
-            {
-                UnitOnScene unit = child.GetComponent<UnitOnScene>();
-                await unit.Attack();
-            }
+            var unit = child.GetComponent<UnitOnScene>();
+            if (unit != null) allUnits.Add(unit);
         }
-        foreach (UnityEngine.Transform child in transform)
+        // Спочатку свої
+        foreach (var unit in allUnits.Where(u => u.fraction == Fraction.MGE))
         {
-            if (child.GetComponent<UnitOnScene>() != null && child.GetComponent<UnitOnScene>().fraction == Fraction.Furry)
-            {
-                UnitOnScene unit = child.GetComponent<UnitOnScene>();
+            if (int.Parse(unit.Hp.text) > 0)
                 await unit.Attack();
-            }
+        }
+
+        // Потім вороги
+        foreach (var unit in allUnits.Where(u => u.fraction == Fraction.Furry))
+        {
+            if (int.Parse(unit.Hp.text) > 0)
+                await unit.Attack();
         }
     }
 
@@ -129,7 +140,6 @@ public class LineScript : MonoBehaviour
         if (hero.parent == transform)
         {
             heroOnLine--;
-            UpdateHeroPositions();
         }
     }
 }

@@ -148,14 +148,13 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         if (!isSelected)
         {
-            Debug.LogWarning("Cannot place card: it is not selected.");
             return false;
         }
 
         DOKillAll();
         KillShake();
 
-        bool placed = line.TryAddCardOnLine(transform);
+        bool placed = line.TryAddCardOnLine(cardData);
         if (placed)
         {
             isSelected = false;
@@ -176,7 +175,6 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private LineScript FindTargetLine()
     {
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Debug.Log(mousePosition);
         LineScript[] lines = FindObjectsOfType<LineScript>();
         foreach (LineScript line in lines)
         {
