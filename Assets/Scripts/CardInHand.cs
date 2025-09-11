@@ -6,6 +6,8 @@ using TMPro;
 
 public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
+    [SerializeField] private LayerMask lineLayer; 
+
     private Vector3 originalPosition;
     private Vector3 originalScale;
     private int originalSiblingIndex;
@@ -55,41 +57,22 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         transform.DOKill(false);
     }
-
     private void Update()
     {
         if (isSelected && Input.GetMouseButtonDown(0))
         {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                Debug.Log("Click blocked by UI element.");
-                return;
-            }
+            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            Debug.Log("No UI overlap. Performing OverlapPoint...");
-            LineScript targetLine = FindTargetLine();
-            if (targetLine != null)
+            // кидаємо променя ТІЛЬКИ по лейеру "Line"
+            RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero, Mathf.Infinity, lineLayer);
+
+            if (hit.collider != null)
             {
-                if (int.Parse(owerUnit.Mana.text) >= int.Parse(costText.text))
+                LineScript targetLine = hit.collider.GetComponent<LineScript>();
+                if (targetLine != null)
                 {
-                    bool placed = PlaceOnLine(targetLine);
-                    if (placed)
-                    {
-                        selectedCard = null;
-                        owerUnit.Mana.text = (int.Parse(owerUnit.Mana.text) - int.Parse(costText.text)).ToString();
-                        HandManager.Instance.UpdateHand();
-                        Destroy(gameObject); 
-                    }
-                    else
-                    {
-                        animator.SetTrigger("NotEnoughtManaTrigger");
-                        Debug.Log("Failed to place card on line: " + targetLine.name);
-                    }
-                }
-                else
-                {
-                    Debug.Log("Not enough mana to place card.");
-                    animator.SetTrigger("NotEnoughtManaTrigger"); 
+                    Debug.Log("Clicked line: " + targetLine.name);
+                    TryPlaceCard(targetLine);
                 }
             }
             else
@@ -99,6 +82,30 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
     }
 
+    private void TryPlaceCard(LineScript targetLine)
+    {
+        if (int.Parse(owerUnit.Mana.text) >= int.Parse(costText.text))
+        {
+            bool placed = PlaceOnLine(targetLine);
+            if (placed)
+            {
+                selectedCard = null;
+                owerUnit.Mana.text = (int.Parse(owerUnit.Mana.text) - int.Parse(costText.text)).ToString();
+                HandManager.Instance.UpdateHand();
+                Destroy(gameObject);
+            }
+            else
+            {
+                animator.SetTrigger("NotEnoughtManaTrigger");
+                Debug.Log("Failed to place card on line: " + targetLine.name);
+            }
+        }
+        else
+        {
+            Debug.Log("Not enough mana to place card.");
+            animator.SetTrigger("NotEnoughtManaTrigger");
+        }
+    }
     public void RefreshOriginalPosition()
     {
         if (!DOTween.IsTweening(transform))
@@ -146,16 +153,14 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public bool PlaceOnLine(LineScript line)
     {
-        if (!isSelected)
-        {
-            return false;
-        }
+        if (!isSelected) return false;
 
         DOKillAll();
         KillShake();
 
-        bool placed = line.TryAddCardOnLine(cardData);
-        if (placed)
+        bool canPlace = line.CheckPosibilityToAddACard();
+        _=line.TryAddCardOnLine(cardData);//eror
+        if (canPlace)
         {
             isSelected = false;
             selectedCard = null;
@@ -169,42 +174,7 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             }
         }
 
-        return placed;
-    }
-
-    private LineScript FindTargetLine()
-    {
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        LineScript[] lines = FindObjectsOfType<LineScript>();
-        foreach (LineScript line in lines)
-        {
-            BoxCollider2D collider = line.GetComponent<BoxCollider2D>();
-            if (collider != null)
-            {
-                Bounds bounds = collider.bounds;
-                Vector3 worldPos = line.transform.position;
-            }
-        }
-
-        Collider2D hitCollider = Physics2D.OverlapPoint(mousePosition);
-        if (hitCollider != null)
-        {
-            LineScript line = hitCollider.GetComponent<LineScript>();
-            if (line != null)
-            {
-                return line;
-            }
-            else
-            {
-                Debug.Log("Hit object does not have LineScript component.");
-            }
-        }
-        else
-        {
-            Debug.Log("OverlapPoint did not hit any collider.");
-        }
-
-        return null;
+        return canPlace;
     }
 
     private void SelectCard()

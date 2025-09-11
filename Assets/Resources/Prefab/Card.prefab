@@ -389,6 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28b4ec9cdf3a3ae4a8da82013f7c0ba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lineLayer:
+    serializedVersion: 2
+    m_Bits: 64
   hoverHeight: 40
   scaleUp: 1.2
   moveDuration: 0.2

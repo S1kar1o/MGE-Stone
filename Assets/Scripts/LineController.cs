@@ -20,6 +20,7 @@ public class LineController : MonoBehaviour
             LineScript lineScript = child.GetComponent<LineScript>();
             if (lineScript != null)
             {
+                await lineScript.StartUseSkills();
                 await lineScript.StartAttack();
             }
         }

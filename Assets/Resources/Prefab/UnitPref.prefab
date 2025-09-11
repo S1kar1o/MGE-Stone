@@ -231,7 +231,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardData: {fileID: 11400000, guid: f196d75ce5497f54fa80b0dc0e7357d1, type: 2}
   attackAction: {fileID: 11400000, guid: 23a748773ae48b040bc59825a5efa6ba, type: 2}
-  actionOnStart: {fileID: 0}
+  abilitySo: {fileID: 0}
   cardImage: {fileID: 2684304792535733945}
   Damage: {fileID: 3873903656638807641}
   Hp: {fileID: 8404806455933908484}
@@ -619,5 +619,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runtimeMaterial: {fileID: 2100000, guid: be7900f1fe0c59d4096e7ec6523264e5, type: 2}
-  burnDuration: 2
+  burnDuration: 1.5
   burnMaterialTemplate: {fileID: 2100000, guid: be7900f1fe0c59d4096e7ec6523264e5, type: 2}

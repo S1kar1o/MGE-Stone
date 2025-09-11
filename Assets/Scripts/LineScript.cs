@@ -15,15 +15,13 @@ public class LineScript : MonoBehaviour
         lineCollider = GetComponent<BoxCollider2D>();
         if (lineCollider == null)
         {
-            Debug.LogError("LineScript requires a BoxCollider2D component!");
         }
     }
-    public bool TryAddCardOnLine(UnitSO unitSO)
+    public async Task TryAddCardOnLine(UnitSO unitSO)
     {
         if (heroOnLine >= 2)
         {
-            Debug.Log("Line is full! Cannot add more heroes.");
-            return false;
+            return ;
         }
 
 
@@ -33,7 +31,7 @@ public class LineScript : MonoBehaviour
         unitOnSceneTransform.SetParent(transform, false);
 
         heroOnLine++;
-        unitOnScene.Initialize();
+        _=unitOnScene.Initialize();
         List<Transform> allies = new List<Transform>();
         foreach (Transform transform in transform)
         {
@@ -47,9 +45,7 @@ public class LineScript : MonoBehaviour
         {
             allies[i].SetSiblingIndex(i); // ставимо на відповідний індекс
         }
-        _ = UpdateHeroPositions();
-
-        return true;
+        await UpdateHeroPositions();
     }
     public bool CheckPosibilityToAddACard()
     {
@@ -102,7 +98,7 @@ public class LineScript : MonoBehaviour
 
         if (allies.Count == 1)
         {
-            await allies[0].DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
+            await allies[0].DOLocalMove(Vector3.zero, 0.2f).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
         }
         else if (allies.Count == 2)
         {
@@ -111,6 +107,7 @@ public class LineScript : MonoBehaviour
             var tween2 = allies[1].DOLocalMove(new Vector3(0, -offset, 0), 0.3f).SetEase(Ease.OutQuad);
             await Task.WhenAll(tween1.AsyncWaitForCompletion(), tween2.AsyncWaitForCompletion());
         }
+
     }
     public async Task StartAttack()
     {
@@ -132,6 +129,27 @@ public class LineScript : MonoBehaviour
         {
             if (int.Parse(unit.Hp.text) > 0)
                 await unit.Attack();
+        }
+    } public async Task StartUseSkills()
+    {
+        var allUnits = new List<UnitOnScene>();
+        foreach (Transform child in transform)
+        {
+            var unit = child.GetComponent<UnitOnScene>();
+            if (unit != null) allUnits.Add(unit);
+        }
+        // Спочатку свої
+        foreach (var unit in allUnits.Where(u => u.fraction == Fraction.MGE))
+        {
+            if (int.Parse(unit.Hp.text) > 0)
+                await unit.StartSkill();
+        }
+
+        // Потім вороги
+        foreach (var unit in allUnits.Where(u => u.fraction == Fraction.Furry))
+        {
+            if (int.Parse(unit.Hp.text) > 0)
+                await unit.StartSkill();
         }
     }
 

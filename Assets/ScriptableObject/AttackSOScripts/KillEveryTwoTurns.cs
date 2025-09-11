@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class KillEveryTwoTurns : AttackActionSO
+[CreateAssetMenu (menuName = "Ability/KillEveryTwoTurns")]
+public class KillEveryTwoTurns : AbilitySO
 {
-    public override bool needToIdentify => true;
-
-    private bool readyToAttack=true;
-   public override async Task Execute(GameObject attacker)
+    public override async Task Execute(GameObject attacker)
     {
         Transform lineTransform = attacker.transform.parent;
         if (readyToAttack)
@@ -21,8 +19,11 @@ public class KillEveryTwoTurns : AttackActionSO
                     targets.Add(unit);
                 }
             }
-            await targets[Random.Range(0, targets.Count)].GetComponent<UnitOnScene>().DestroyCard();
-            readyToAttack = !readyToAttack;
+            if (targets.Count > 0)
+            {
+                await targets[Random.Range(0, targets.Count)].GetComponent<UnitOnScene>().DestroyCard();
+                readyToAttack = !readyToAttack;
+            }
             return;
         }
         readyToAttack = !readyToAttack;

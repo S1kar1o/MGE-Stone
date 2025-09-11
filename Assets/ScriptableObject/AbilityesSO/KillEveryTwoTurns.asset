@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cff6df02047e334ab91341987388e06, type: 3}
-  m_Name: MGEUnitsSOList
+  m_Script: {fileID: 11500000, guid: d664d7abbe552c445ad2c83eb16245c0, type: 3}
+  m_Name: KillEveryTwoTurns
   m_EditorClassIdentifier: 
-  UnitsSoList:
-  - {fileID: 11400000, guid: 1c32f84d02aec6b44bca43b1b69ac1a1, type: 2}
+  readyToAttack: 0
+  executeOnStart: 0
+  attackSkill: 1

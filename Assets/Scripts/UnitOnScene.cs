@@ -9,7 +9,7 @@ public class UnitOnScene : MonoBehaviour
 {
     public UnitSO cardData; // посилання на ScriptableObject
     [SerializeField] private AttackActionSO attackAction;
-    [SerializeField] private AttackActionSO actionOnStart;
+    [SerializeField] private AbilitySO abilitySo;
     public Image cardImage;
     public TextMeshProUGUI Damage;
     public TextMeshProUGUI Hp;
@@ -21,7 +21,7 @@ public class UnitOnScene : MonoBehaviour
     private const string GET_DAMAGE_TRIGER = "GetDamage";
     private const string DEATH_TRIGER = "Death";
     [SerializeField] private CardBurnEffect cardBurnEffectScript;
-    public void Initialize()
+    public async Task Initialize()
     {
         if (cardData != null)
         {
@@ -30,11 +30,19 @@ public class UnitOnScene : MonoBehaviour
             Hp.text = cardData.Hp.ToString();
             fraction = cardData.Fraction;
             attackAction = cardData.attackAction;
-            actionOnStart = cardData.actionOnStart;
+            abilitySo = cardData.actionOnStart;
         }
-        if (actionOnStart != null)
+        if (abilitySo != null)
         {
-            actionOnStart.Execute(gameObject);
+            if (abilitySo.needToIdentify)
+            {
+                AbilitySO attackActionOnStartSO = Instantiate(abilitySo);
+                abilitySo = attackActionOnStartSO;
+            }
+            if (abilitySo.executeOnStart)
+            {
+                await abilitySo.Execute(gameObject);
+            }
         }
     }
     public void boostDamage(int damageBoost) {
@@ -45,12 +53,7 @@ public class UnitOnScene : MonoBehaviour
     {
         if (damage >= int.Parse(Hp.text))
         {
-            Hp.text = 0.ToString();
-            // Запускаємо обидві анімації паралельно
-            await Task.WhenAll(
-                PlayTriggerAnimation(DEATH_TRIGER),
-                cardBurnEffectScript.StartBurnAsync()
-            );
+          
             await DestroyCard();
         }
         else
@@ -58,15 +61,24 @@ public class UnitOnScene : MonoBehaviour
             Hp.text = (int.Parse(Hp.text) - damage).ToString();
             await PlayTriggerAnimation(GET_DAMAGE_TRIGER);
         }
-
+    }
+    public async Task ChangeUnitTo(UnitSO newUnitData)
+    {
+        cardData = newUnitData;
+        await Initialize();
     }
     public async Task DestroyCard()
     {
+        Hp.text = 0.ToString();
+        await Task.WhenAll(PlayTriggerAnimation(DEATH_TRIGER),
+        cardBurnEffectScript.StartBurnPartialAsync()
+           );
+
         Transform lineTransform = gameObject.transform.parent;
         LineScript lineScript = lineTransform.GetComponent<LineScript>();
         if (fraction == GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction)
             lineScript.RemoveHero(gameObject.transform);
-        transform.SetParent(null);
+        transform.SetParent(lineTransform.transform.parent);
         await lineScript.UpdateHeroPositions();
         Destroy(gameObject);
     }
@@ -93,10 +105,32 @@ public class UnitOnScene : MonoBehaviour
             Hp.text = (int.Parse(Hp.text) + healAmount).ToString();
         }
     }
+    public async Task StartSkill()
+    {
+        if (int.Parse(Hp.text) <= 0) return; // мертвий — не атакує
+        if (abilitySo != null)
+        {
+            if (!abilitySo.attackSkill)
+            {
+                await abilitySo.Execute(gameObject);
+            }
+        }
+    }
     public async Task Attack()
     {
         if (int.Parse(Hp.text) <= 0) return; // мертвий — не атакує
-        await attackAction.Execute(gameObject);
+        if (abilitySo != null)
+        {
+            if (abilitySo.attackSkill)
+            {
+                await abilitySo.Execute(gameObject);
+            }
+        }
+        if (attackAction != null)
+        {
+            await attackAction.Execute(gameObject);
+        }
+        
     }
     public async Task PlayAttackAnimationWithMove(Transform target)
     {
@@ -115,7 +149,6 @@ public class UnitOnScene : MonoBehaviour
         await Task.WhenAll(triggerAnimTask, moveAnimTask);
 
 
-        Debug.Log(name + ": Attack animation (trigger + move) finished");
     }
 
     private async Task PlayTriggerAnimation(string nameOfTrigger)
@@ -125,7 +158,6 @@ public class UnitOnScene : MonoBehaviour
         // Отримуємо hash потрібного стейта
         int attackHash = Animator.StringToHash("Base Layer." + nameOfTrigger);
 
-        Debug.Log($"{nameOfTrigger}: {attackHash}");
         // Чекаємо поки ми ввійдемо у цей стейт
         while (animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash != attackHash)
             await Task.Yield();

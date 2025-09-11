@@ -19,19 +19,22 @@ public class CardBurnEffect : MonoBehaviour
         if (img != null) img.material = runtimeMaterial;
     }
 
-    public async Task StartBurnAsync()
+   public async Task StartBurnPartialAsync(float targetProgress = 0.8f)
+{
+    runtimeMaterial.SetFloat("_BurnAmount", 0f);
+
+    Tween burnTween = DOTween.To(
+        () => runtimeMaterial.GetFloat("_BurnAmount"),
+        x => runtimeMaterial.SetFloat("_BurnAmount", x),
+        1f,
+        burnDuration
+    );
+
+    // чекаЇмо, поки Tween дос€гне targetProgress
+    while (runtimeMaterial.GetFloat("_BurnAmount") < targetProgress)
     {
-        runtimeMaterial.SetFloat("_BurnAmount", 0f);
+        await Task.Yield(); // в≥ддаЇмо контроль головному потоку
+    }
+}
 
-        Tween burnTween = DOTween.To(
-            () => runtimeMaterial.GetFloat("_BurnAmount"),
-            x => runtimeMaterial.SetFloat("_BurnAmount", x),
-            1f,
-            burnDuration
-        );
-
-        await burnTween.AsyncWaitForCompletion(); // чекаЇмо завершенн€
-
-/*        Destroy(gameObject, 0.1f);
-*/    }
 }

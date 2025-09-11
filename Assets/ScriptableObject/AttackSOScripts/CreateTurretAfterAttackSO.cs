@@ -3,20 +3,43 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "AttackActions/CreateTurretAfterAttackSO")]
-public class CreateTurretAfterAttackSO : AttackActionSO
+[CreateAssetMenu(menuName = "Ability/CreateTurretAfterSO")]
+public class CreateTurretAfterAttackSO : AbilitySO
 {
-    public UnitSO objectForSpawnData;
-    bool IsSpawned=false;
+    public UnitSO objectForSpawnFirstLevelData;
+    public UnitSO objectForSpawnSecondLevelData;
+    public UnitSO objectForSpawnThirdLevelData;
+    public bool waitingForNextTurn = false;
     public override async Task Execute(GameObject attacker)
     {
         Transform lineTransform = attacker.transform.parent;
-        UnitOnScene attackerUnitOnScene = attacker.GetComponent<UnitOnScene>();
         LineScript lineScript = lineTransform.GetComponent<LineScript>();
-        if (lineScript.CheckPosibilityToAddACard())
+        if (!waitingForNextTurn)
         {
-           
-            lineScript.TryAddCardOnLine(objectForSpawnData);
+            if (lineScript.CheckPosibilityToAddACard())
+            {
+                await lineScript.TryAddCardOnLine(objectForSpawnFirstLevelData);
+                waitingForNextTurn = !waitingForNextTurn;
+                return;
+            }
+            foreach (Transform child in lineTransform)
+            {
+                UnitOnScene unitOnLine = child.GetComponent<UnitOnScene>();
+                if (unitOnLine.cardData == objectForSpawnFirstLevelData)
+                {
+                    await unitOnLine.ChangeUnitTo(objectForSpawnSecondLevelData);
+                    waitingForNextTurn = !waitingForNextTurn;
+                    break;
+                }
+                else if(unitOnLine.cardData == objectForSpawnSecondLevelData)
+                {
+                    await unitOnLine.ChangeUnitTo(objectForSpawnThirdLevelData);
+                    waitingForNextTurn = !waitingForNextTurn;
+                    break;
+                }
+
+            }
         }
+        waitingForNextTurn = !waitingForNextTurn;
     }
 }
