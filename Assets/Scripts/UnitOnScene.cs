@@ -21,6 +21,8 @@ public class UnitOnScene : MonoBehaviour
     private const string GET_DAMAGE_TRIGER = "GetDamage";
     private const string DEATH_TRIGER = "Death";
     [SerializeField] private CardBurnEffect cardBurnEffectScript;
+
+    public int maxHp;
     public async Task Initialize()
     {
         if (cardData != null)
@@ -30,7 +32,8 @@ public class UnitOnScene : MonoBehaviour
             Hp.text = cardData.Hp.ToString();
             fraction = cardData.Fraction;
             attackAction = cardData.attackAction;
-            abilitySo = cardData.actionOnStart;
+            abilitySo = cardData.abilityAction;
+            maxHp = int.Parse(Hp.text);
         }
         if (abilitySo != null)
         {
@@ -110,7 +113,7 @@ public class UnitOnScene : MonoBehaviour
         if (int.Parse(Hp.text) <= 0) return; // мертвий Ч не атакуЇ
         if (abilitySo != null)
         {
-            if (!abilitySo.attackSkill)
+            if (abilitySo.multipleExecuted)
             {
                 await abilitySo.Execute(gameObject);
             }

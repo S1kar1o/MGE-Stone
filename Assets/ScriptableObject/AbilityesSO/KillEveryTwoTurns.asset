@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d664d7abbe552c445ad2c83eb16245c0, type: 3}
   m_Name: KillEveryTwoTurns
   m_EditorClassIdentifier: 
-  readyToAttack: 0
+  needToIdentify: 0
+  readyToAttack: 1
   executeOnStart: 0
   attackSkill: 1
+  multipleExecuted: 1

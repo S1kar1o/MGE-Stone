@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TurretLevelSecondSO
   m_EditorClassIdentifier: 
   Hp: 5
-  Damage: 4
+  Damage: 3
   cost: 0
   cardSprite: {fileID: 21300000, guid: 2c20826934f11f04a95bdbf1932ce864, type: 3}
   cardName: 
@@ -22,4 +22,4 @@ MonoBehaviour:
   Fraction: 0
   Type: 1
   attackAction: {fileID: 11400000, guid: 71edf34b448e1cd42a9ef0da41693c0b, type: 2}
-  actionOnStart: {fileID: 0}
+  abilityAction: {fileID: 0}

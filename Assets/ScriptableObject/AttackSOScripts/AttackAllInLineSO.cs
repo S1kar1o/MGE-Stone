@@ -12,13 +12,12 @@ public class AttackAllInLineSO : AttackActionSO
         if (lineTransform != null)
         {
             bool enemyInRow = false;
-            foreach (Transform child in lineTransform)
+            foreach (UnitOnScene child in lineTransform.GetComponentsInChildren<UnitOnScene>())
             {
-                UnitOnScene unitOnScene = child.GetComponent<UnitOnScene>();
-                if (unitOnScene.fraction != attackerUnitOnScene.fraction && int.Parse(unitOnScene.Hp.text) > 0)
+                if (child.fraction != attackerUnitOnScene.fraction && int.Parse(child.Hp.text) > 0)
                 {
                     enemyInRow = true;
-                    await attackerUnitOnScene.PlayAttackAnimationWithMove(unitOnScene.transform);
+                    await attackerUnitOnScene.PlayAttackAnimationWithMove(child.transform);
 
                 }
             }

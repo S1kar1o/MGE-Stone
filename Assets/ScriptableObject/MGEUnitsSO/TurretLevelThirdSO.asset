@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: TurretLevelThirdSO
   m_EditorClassIdentifier: 
   Hp: 7
-  Damage: 6
+  Damage: 5
   cost: 0
   cardSprite: {fileID: 21300000, guid: 68f547f63a085934fb37ba8c6eff770c, type: 3}
   cardName: 
   UnitPref: {fileID: 6660218741132165414, guid: 0c2dcdbf4ffcc1b4f865e10f882eec00, type: 3}
   HeroDescription: 
   Fraction: 0
-  Type: 1
-  attackAction: {fileID: 11400000, guid: d189907aeb92f2747b2dfd2be44455a1, type: 2}
-  actionOnStart: {fileID: 0}
+  Type: 2
+  attackAction: {fileID: 11400000, guid: 71edf34b448e1cd42a9ef0da41693c0b, type: 2}
+  abilityAction: {fileID: 11400000, guid: abf8a512b30eeec45919c30ce76ea0cb, type: 2}

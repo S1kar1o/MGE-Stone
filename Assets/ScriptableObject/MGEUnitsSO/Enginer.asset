@@ -22,4 +22,4 @@ MonoBehaviour:
   Fraction: 0
   Type: 3
   attackAction: {fileID: 11400000, guid: 23a748773ae48b040bc59825a5efa6ba, type: 2}
-  actionOnStart: {fileID: 11400000, guid: 63b822081b3b6644fbfc2e8e227ddf88, type: 2}
+  abilityAction: {fileID: 11400000, guid: 63b822081b3b6644fbfc2e8e227ddf88, type: 2}

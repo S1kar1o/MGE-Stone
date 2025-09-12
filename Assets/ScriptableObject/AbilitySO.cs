@@ -8,6 +8,7 @@ public abstract class AbilitySO : AttackActionSO
     public bool readyToAttack = true;
     public bool executeOnStart = false;
     public bool attackSkill=false;
+    public bool multipleExecuted = true;
     public override abstract Task Execute(GameObject attacker);
     
 }

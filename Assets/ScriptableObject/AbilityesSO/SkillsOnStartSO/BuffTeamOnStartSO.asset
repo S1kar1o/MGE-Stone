@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bccf84b5003a4f4dbad2a418f417492, type: 3}
   m_Name: BuffTeamOnStartSO
   m_EditorClassIdentifier: 
+  needToIdentify: 0
+  readyToAttack: 1
+  executeOnStart: 1
+  attackSkill: 0
+  multipleExecuted: 0
   boosterDamage: 3

@@ -16,6 +16,7 @@ MonoBehaviour:
   readyToAttack: 1
   executeOnStart: 0
   attackSkill: 0
+  multipleExecuted: 1
   objectForSpawnFirstLevelData: {fileID: 11400000, guid: dce0e29721a846d4594d673db49e9784, type: 2}
   objectForSpawnSecondLevelData: {fileID: 11400000, guid: 11078b1cc041d3d46b3a1c4cce02d307, type: 2}
   objectForSpawnThirdLevelData: {fileID: 11400000, guid: 3e3cf9ad194be4d43a65909a1efdb946, type: 2}

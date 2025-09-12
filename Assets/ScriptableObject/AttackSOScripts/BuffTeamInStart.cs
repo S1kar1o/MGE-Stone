@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "AttackActions/BuffTeamDamageOnStartSO")]
-public class BuffTeamInStart : AttackActionSO
+public class BuffTeamInStart : AbilitySO
 {
     public int boosterDamage;
     public override async Task Execute(GameObject attacker)

@@ -13,7 +13,7 @@ public class UnitSO : ScriptableObject
     public Fraction Fraction;
     public Type Type;
     public AttackActionSO attackAction;
-    public AbilitySO actionOnStart;
+    public AbilitySO abilityAction;
 
 }
 public enum Fraction{

@@ -9,8 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cff6df02047e334ab91341987388e06, type: 3}
-  m_Name: MGEUnitsSOList
+  m_Script: {fileID: 11500000, guid: f80b9848f4c495f408d8b6e7d64852ed, type: 3}
+  m_Name: DoubleAttackSO
   m_EditorClassIdentifier: 
-  UnitsSoList:
-  - {fileID: 11400000, guid: 8f1019ef9dbe9d0429fd848bc9a010de, type: 2}
+  attackTimes: 2
