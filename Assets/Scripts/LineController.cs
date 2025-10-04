@@ -1,19 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
+using Photon.Pun;
+using System.Threading.Tasks;
 using static TurnManager;
 
-public class LineController : MonoBehaviour
+public class LineController : MonoBehaviourPunCallbacks
 {
-    void Start()
+    private PhotonView photonView;
+
+    private void Awake()
+    {
+        photonView = GetComponent<PhotonView>();
+        if (photonView == null)
+        {
+            photonView = gameObject.AddComponent<PhotonView>();
+            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
+        }
+    }
+
+    private void Start()
     {
         TurnManager.Instance.TurnChanged += OnTurnChanged;
     }
 
     private async void OnTurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
     {
-        if (e.state != TurnState.Fighting) return;
+        if (e.state != TurnState.Fighting || !PhotonNetwork.IsMasterClient) return;
 
         foreach (Transform child in transform)
         {
@@ -26,8 +37,7 @@ public class LineController : MonoBehaviour
         }
 
         // Викликаємо наступний хід після завершення атак
-        // Але робимо це через маленьку затримку, щоб не запускати TurnChanged рекурсивно
-        await Task.Yield(); // чекає наступного кадру
-        TurnManager.Instance.StartNextTurn();
+        await Task.Yield();
+        TurnManager.Instance.photonView.RPC("StartNextTurn", RpcTarget.All);
     }
 }

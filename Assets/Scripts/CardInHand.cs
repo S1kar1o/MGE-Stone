@@ -36,7 +36,7 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private void Start()
     {
-        owerUnit = GameObject.FindWithTag("Player").GetComponent<HeroOnScene>();
+        owerUnit = GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>();
     }
     public void Initialize()
     {

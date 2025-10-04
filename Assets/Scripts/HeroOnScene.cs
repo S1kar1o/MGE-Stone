@@ -1,22 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using static TurnManager;
+using TMPro;
+using Photon.Pun;
 
-public class HeroOnScene : MonoBehaviour
+public class HeroOnScene : MonoBehaviourPunCallbacks
 {
-    public HeroesSO cardData; // посилання на ScriptableObject
+    public HeroesSO cardData;
     public Image cardImage;
     public TextMeshProUGUI Mana;
     public TextMeshProUGUI Hp;
     public Animator animator;
     public Fraction fraction;
+
+    private PhotonView photonView;
+
+    private void Awake()
+    {
+        photonView = GetComponent<PhotonView>();
+        if (photonView == null)
+        {
+            photonView = gameObject.AddComponent<PhotonView>();
+            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
+        }
+        Debug.Log($"HeroOnScene.Awake на {gameObject.name}. PhotonView: {photonView}, cardImage: {cardImage}, Hp: {Hp}, Mana: {Mana}");
+    }
+
     public void Initialize(HeroesSO heroData)
     {
         cardData = heroData;
+        Debug.Log($"Initialize викликано для {gameObject.name} з heroData: {heroData?.name ?? "null"}");
         if (cardData != null)
         {
             cardImage.sprite = cardData.cardSprite;
@@ -27,8 +40,14 @@ public class HeroOnScene : MonoBehaviour
             {
                 animator.runtimeAnimatorController = cardData.animatorController;
             }
+            Debug.Log($"Успішно ініціалізовано: Hp={Hp.text}, Mana={Mana.text}");
+        }
+        else
+        {
+            Debug.LogError($"heroData null для {gameObject.name}");
         }
     }
+
     private void Start()
     {
         TurnManager.Instance.TurnChanged += On_TurnChanged;
@@ -36,26 +55,42 @@ public class HeroOnScene : MonoBehaviour
 
     private void On_TurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
     {
-        UpdateManaValue(e);
+        if ((e.state == TurnManager.TurnState.YourSpawning && photonView.IsMine) ||
+            (e.state == TurnManager.TurnState.EnemySpawning && !photonView.IsMine))
+        {
+            photonView.RPC("UpdateManaValue", RpcTarget.All, e.state);
+        }
     }
-    private void UpdateManaValue(TurnManager.OnStateChangedEventArgs e)
+
+    [PunRPC]
+    private void UpdateManaValue(TurnManager.TurnState state)
     {
-        if (e.state == TurnState.YourSpawning)
+        if (state == TurnManager.TurnState.YourSpawning)
         {
             Mana.text = (int.Parse(Mana.text) + 2).ToString();
         }
     }
+
     public void GetDamage(int damage)
+    {
+        photonView.RPC("SyncGetDamage", RpcTarget.All, damage);
+    }
+
+    [PunRPC]
+    private void SyncGetDamage(int damage)
     {
         if (damage >= int.Parse(Hp.text))
         {
             CongratulationMenu.Instance.EndGamePanel(this);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                TurnManager.Instance.photonView.RPC("EndGame", RpcTarget.All, photonView.IsMine);
+            }
         }
         else
         {
             animator.SetTrigger("GetDamage");
             Hp.text = (int.Parse(Hp.text) - damage).ToString();
         }
-
     }
 }

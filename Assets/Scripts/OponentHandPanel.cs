@@ -28,6 +28,7 @@ public class OponentHandPanel : MonoBehaviour
 
     public void TryAddCardToEnemyHand()
     {
+        Debug.Log("TryAddCard");
         Instantiate(enemyCardPref,transform);
     }
   

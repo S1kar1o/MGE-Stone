@@ -65,7 +65,7 @@ public class LineScript : MonoBehaviour
         {
             var unit = child.GetComponent<UnitOnScene>();
             if (unit != null &&
-                unit.fraction != GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction &&
+                unit.fraction != GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction &&
                 int.Parse(unit.Hp.text) > 0)
             {
                 enemies.Add(child);
@@ -88,7 +88,7 @@ public class LineScript : MonoBehaviour
         foreach (UnityEngine.Transform child in transform)
         {
             var unit = child.GetComponent<UnitOnScene>();
-            var hero = GameManager.Instance.GetOwerHeroes()?.GetComponent<HeroOnScene>();
+            var hero = GameManager.Instance.GetOwnerHeroes()?.GetComponent<HeroOnScene>();
 
             if (unit != null && hero != null && unit.fraction == hero.fraction)
             {

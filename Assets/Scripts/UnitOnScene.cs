@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class UnitOnScene : MonoBehaviour
 {
-    public UnitSO cardData; // посилання на ScriptableObject
+    public UnitSO cardData;
     [SerializeField] private AttackActionSO attackAction;
     [SerializeField] private AbilitySO abilitySo;
     public Image cardImage;
@@ -79,7 +79,7 @@ public class UnitOnScene : MonoBehaviour
 
         Transform lineTransform = gameObject.transform.parent;
         LineScript lineScript = lineTransform.GetComponent<LineScript>();
-        if (fraction == GameManager.Instance.GetOwerHeroes().GetComponent<HeroOnScene>().fraction)
+        if (fraction == GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction)
             lineScript.RemoveHero(gameObject.transform);
         transform.SetParent(lineTransform.transform.parent);
         await lineScript.UpdateHeroPositions();
@@ -92,9 +92,6 @@ public class UnitOnScene : MonoBehaviour
 
         Vector3 startPos = transform.position;
         Vector3 targetPos = target.position;
-
-        // Запускаємо тригерну анімацію
-        // Запускаємо рух вперед-назад
         var moveAnimTask = MoveWithDOTween(startPos, targetPos, target);
         var triggerAnimTask = PlayTriggerAnimation(HEALING_TRIGER_ANIMATION);
 
@@ -110,7 +107,7 @@ public class UnitOnScene : MonoBehaviour
     }
     public async Task StartSkill()
     {
-        if (int.Parse(Hp.text) <= 0) return; // мертвий — не атакує
+        if (int.Parse(Hp.text) <= 0) return; 
         if (abilitySo != null)
         {
             if (abilitySo.multipleExecuted)
@@ -121,7 +118,7 @@ public class UnitOnScene : MonoBehaviour
     }
     public async Task Attack()
     {
-        if (int.Parse(Hp.text) <= 0) return; // мертвий — не атакує
+        if (int.Parse(Hp.text) <= 0) return; 
         if (abilitySo != null)
         {
             if (abilitySo.attackSkill)
@@ -143,10 +140,8 @@ public class UnitOnScene : MonoBehaviour
         Vector3 startPos = transform.position;
         Vector3 targetPos = target.position;
 
-        // Запускаємо тригерну анімацію
         var triggerAnimTask = PlayTriggerAnimation(ATTACK_TRIGER_ANIMATION);
 
-        // Запускаємо рух вперед-назад
         var moveAnimTask = MoveWithDOTween(startPos, targetPos, target);
 
         await Task.WhenAll(triggerAnimTask, moveAnimTask);
@@ -158,14 +153,11 @@ public class UnitOnScene : MonoBehaviour
     {
         animatorController.SetTrigger(nameOfTrigger);
 
-        // Отримуємо hash потрібного стейта
         int attackHash = Animator.StringToHash("Base Layer." + nameOfTrigger);
 
-        // Чекаємо поки ми ввійдемо у цей стейт
         while (animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash != attackHash)
             await Task.Yield();
 
-        // Чекаємо завершення анімації
         while (animatorController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f &&
                animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash == attackHash)
         {
@@ -180,7 +172,6 @@ public class UnitOnScene : MonoBehaviour
         float pause = 0.1f;     // затримка на ударі
 
         Vector3 vector3 = new Vector3(startPos.x, targetPos.y, startPos.z);
-        // Tween вперед
         await transform.DOMove(vector3, duration).SetEase(Ease.OutQuad).AsyncWaitForCompletion();
 
         UnitOnScene enemy = target.GetComponent<UnitOnScene>();
@@ -193,8 +184,6 @@ public class UnitOnScene : MonoBehaviour
 
 
         await Task.Delay((int)(pause * 1000));
-        //  пауза
-        // Tween назад
         await transform.DOMove(startPos, duration).SetEase(Ease.InQuad).AsyncWaitForCompletion();
 
         if (animationOfGetDamageByEnemy != null)

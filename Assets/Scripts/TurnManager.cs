@@ -1,55 +1,72 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
+using System.Collections.Generic;
 
-public class TurnManager : MonoBehaviour
+public class TurnManager : MonoBehaviourPunCallbacks
 {
     public event EventHandler<OnStateChangedEventArgs> TurnChanged;
     public class OnStateChangedEventArgs : EventArgs
     {
         public TurnState state;
     }
+
     public enum TurnState
     {
         CalculatingTurn,
         YourSpawning,
         EnemySpawning,
-       Fighting,
+        Fighting
     }
 
+    public static TurnManager Instance { get; private set; }
     public TurnState currentState;
+    [SerializeField] private Button EndTurnButton;
+    [SerializeField] private float turnTime = 30f;
 
     private List<TurnState> turnQueue = new List<TurnState>();
     private int currentIndex = 0;
     private bool playerFirst;
     private bool isPlayerFirstSet = false;
-    public static TurnManager Instance { get; private set; }
-    public Button EndTurnButton;
+    private PhotonView photonView;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject); // якщо вже є інший екземпляр, видаляємо цей
+            Destroy(gameObject);
             return;
         }
         Instance = this;
+        photonView = GetComponent<PhotonView>();
+        if (photonView == null)
+        {
+            photonView = gameObject.AddComponent<PhotonView>();
+            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
+        }
     }
+
     private void Start()
     {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            InitializeTurnOrder();
+            photonView.RPC("SyncTurnOrder", RpcTarget.All, playerFirst);
+            StartCoroutine(TurnTimer());
+        }
         EndTurnButton.onClick.AddListener(() =>
         {
-            StartNextTurn();
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC("StartNextTurn", RpcTarget.All);
+            }
         });
-        InitializeTurnOrder();
-        StartNextTurn();
     }
 
     private void InitializeTurnOrder()
     {
-        turnQueue.Clear();
-
-        // Рандомізуємо, хто ходить першим
         if (!isPlayerFirstSet)
         {
             playerFirst = UnityEngine.Random.value > 0.5f;
@@ -69,18 +86,45 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    [PunRPC]
+    private void SyncTurnOrder(bool isPlayerFirst)
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            playerFirst = !isPlayerFirst;
+            isPlayerFirstSet=true;
+            InitializeTurnOrder();
+        }
+        StartNextTurn();
+    }
+
+    [PunRPC]
     public void StartNextTurn()
     {
-        if (turnQueue.Count == 0) {
-            InitializeTurnOrder();
-            currentIndex = 0;
-        };
-
         currentState = turnQueue[currentIndex];
-
-        // Після закінчення поточного ходу викликаємо наступний
         TurnChanged?.Invoke(this, new OnStateChangedEventArgs { state = currentState });
 
         currentIndex = (currentIndex + 1) % turnQueue.Count;
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(TurnTimer());
+        }
+    }
+
+    private IEnumerator TurnTimer()
+    {
+        yield return new WaitForSeconds(turnTime);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("StartNextTurn", RpcTarget.All);
+        }
+    }
+
+    [PunRPC]
+    public void EndGame(bool player1Won)
+    {
+        Debug.Log($"{(player1Won ? "Player 1" : "Player 2")} won!");
+        PhotonNetwork.LoadLevel("LobbyScene");
     }
 }
