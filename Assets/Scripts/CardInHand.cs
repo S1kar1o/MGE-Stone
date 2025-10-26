@@ -3,10 +3,11 @@ using UnityEngine.EventSystems;
 using DG.Tweening;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Pun;
 
-public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    [SerializeField] private LayerMask lineLayer; 
+    [SerializeField] private LayerMask lineLayer;
 
     private Vector3 originalPosition;
     private Vector3 originalScale;
@@ -20,6 +21,7 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private static CardInHand selectedCard;
     private bool isSelected = false;
 
+    [SerializeField] public bool IsEnemyCard = false;
     public bool IsSelected
     {
         get { return isSelected; }
@@ -33,13 +35,31 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [SerializeField] private HeroOnScene owerUnit;
     [SerializeField] private Animator animator;
 
-
+    [SerializeField] private Transform enemyVisual, ownerVisual;
     private void Start()
     {
         owerUnit = GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>();
+        if (IsEnemyCard)
+        {
+            enemyVisual.gameObject.SetActive(true);
+            //this.enabled = false;
+        }
+        else
+        {
+            ownerVisual.gameObject.SetActive(true);
+        }
     }
     public void Initialize()
     {
+        if (IsEnemyCard)
+        {
+            enemyVisual.gameObject.SetActive(true);
+            this.enabled = false;
+        }
+        else
+        {
+            ownerVisual.gameObject.SetActive(true);
+        }
         if (cardData != null)
         {
             cardImage.sprite = cardData.cardSprite;
@@ -49,8 +69,9 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             originalPosition = transform.localPosition;
             originalScale = transform.localScale;
             originalSiblingIndex = transform.GetSiblingIndex();
-/*            animator.SetTrigger("CardSpawnedTrigger");
-*/
+
+            /*            animator.SetTrigger("CardSpawnedTrigger");
+            */
         }
     }
     public void DOKillAll()
@@ -72,7 +93,10 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 if (targetLine != null)
                 {
                     Debug.Log("Clicked line: " + targetLine.name);
-                    TryPlaceCard(targetLine);
+                    int unitIndex = SpawnManager.Instance.unitSOList.UnitsSoList.IndexOf(cardData);
+
+                    photonView.RPC(nameof(TryPlaceCard), RpcTarget.All, targetLine.name, unitIndex);
+
                 }
             }
             else
@@ -81,9 +105,15 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             }
         }
     }
-
-    private void TryPlaceCard(LineScript targetLine)
+    [PunRPC]
+    private void TryPlaceCard(string targetLineName, int unitIndexInList)
     {
+        GameObject targetLineGameObject = GameObject.Find(targetLineName);
+        LineScript targetLine = targetLineGameObject.GetComponent<LineScript>();
+        UnitSO unitSO = SpawnManager.Instance.unitSOList.UnitsSoList[unitIndexInList];
+        if (cardData == null)
+            cardData = unitSO;
+
         if (int.Parse(owerUnit.Mana.text) >= int.Parse(costText.text))
         {
             bool placed = PlaceOnLine(targetLine);
@@ -159,7 +189,7 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         KillShake();
 
         bool canPlace = line.CheckPosibilityToAddACard();
-        _=line.TryAddCardOnLine(cardData);//eror
+        _ = line.TryAddCardOnLine(cardData, false);
         if (canPlace)
         {
             isSelected = false;
@@ -202,29 +232,29 @@ public class CardInHand : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         transform.DOScale(originalScale, moveDuration);
     }
     private void StartShake()
-{
-    // shakeSequence керує CardContainer
-    KillShake();
-
-    shakeSequence = DOTween.Sequence();
-    
-    shakeSequence.Append(transform.DOLocalRotate(new Vector3(0, 0, 10f), 0.15f).SetEase(Ease.InOutSine));
-    shakeSequence.Join(transform.DOShakePosition(0.3f, new Vector3(8f, 0, 0), 6));
-    shakeSequence.Append(transform.DOLocalRotate(new Vector3(0, 0, -10f), 0.15f).SetEase(Ease.InOutSine));
-    shakeSequence.Join(transform.DOShakePosition(0.3f, new Vector3(8f, 0, 0), 6));
-    shakeSequence.Append(transform.DOLocalRotate(Vector3.zero, 0.15f).SetEase(Ease.InOutSine));
-
-    shakeSequence.SetLoops(-1, LoopType.Restart).SetId("shake");
-}
-
-private void KillShake()
-{
-    if (shakeSequence != null && shakeSequence.IsActive())
     {
-        shakeSequence.Kill();
-        shakeSequence = null;
+        // shakeSequence керує CardContainer
+        KillShake();
+
+        shakeSequence = DOTween.Sequence();
+
+        shakeSequence.Append(transform.DOLocalRotate(new Vector3(0, 0, 10f), 0.15f).SetEase(Ease.InOutSine));
+        shakeSequence.Join(transform.DOShakePosition(0.3f, new Vector3(8f, 0, 0), 6));
+        shakeSequence.Append(transform.DOLocalRotate(new Vector3(0, 0, -10f), 0.15f).SetEase(Ease.InOutSine));
+        shakeSequence.Join(transform.DOShakePosition(0.3f, new Vector3(8f, 0, 0), 6));
+        shakeSequence.Append(transform.DOLocalRotate(Vector3.zero, 0.15f).SetEase(Ease.InOutSine));
+
+        shakeSequence.SetLoops(-1, LoopType.Restart).SetId("shake");
     }
-    transform.localRotation = Quaternion.identity;
-}
+
+    private void KillShake()
+    {
+        if (shakeSequence != null && shakeSequence.IsActive())
+        {
+            shakeSequence.Kill();
+            shakeSequence = null;
+        }
+        transform.localRotation = Quaternion.identity;
+    }
 
 }

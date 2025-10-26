@@ -194,6 +194,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6660218741132165414}
   - component: {fileID: 3679188943444073591}
+  - component: {fileID: 2966169417493935280}
   m_Layer: 0
   m_Name: UnitPref
   m_TagString: Untagged
@@ -229,8 +230,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7ed97c070698b74a99da8d201c7e1ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardData: {fileID: 11400000, guid: f196d75ce5497f54fa80b0dc0e7357d1, type: 2}
-  attackAction: {fileID: 11400000, guid: 23a748773ae48b040bc59825a5efa6ba, type: 2}
+  cardData: {fileID: 0}
+  attackAction: {fileID: 0}
   abilitySo: {fileID: 0}
   cardImage: {fileID: 2684304792535733945}
   Damage: {fileID: 3873903656638807641}
@@ -238,6 +239,29 @@ MonoBehaviour:
   fraction: 1
   animatorController: {fileID: 6535452325597209394}
   cardBurnEffectScript: {fileID: 8751286390915442860}
+  maxHp: 0
+--- !u!114 &2966169417493935280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5009478790756892791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 1
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &5621278853209017685
 GameObject:
   m_ObjectHideFlags: 0

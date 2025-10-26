@@ -11,28 +11,13 @@ public class OponentHandPanel : MonoBehaviour
     private void Awake()
     {
         panel = GetComponent<RectTransform>();
-        TurnManager.Instance.TurnChanged += On_TurnChanged;
     }
     private void Start()
     {
         AlignChildren();
     }
-    private void On_TurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
-    {
-        if(e.state== TurnState.EnemySpawning)
-        {
-            TryAddCardToEnemyHand();
-            AlignChildren();
-        }
-    }
-
-    public void TryAddCardToEnemyHand()
-    {
-        Debug.Log("TryAddCard");
-        Instantiate(enemyCardPref,transform);
-    }
   
-    private void AlignChildren()
+    public void AlignChildren()
     {
         int count = transform.childCount;
         if (count == 0) return;
@@ -40,7 +25,7 @@ public class OponentHandPanel : MonoBehaviour
         float panelWidth = panel.rect.width;
 
         // беремо розмір картки (припускаємо, що всі однакові)
-        RectTransform firstCard = transform.GetChild(0).GetComponent<RectTransform>();
+        RectTransform firstCard = transform.GetChild(0).GetChild(0).GetComponent<RectTransform>();
         float cardWidth = firstCard.rect.width;
         float pivotOffset = (0.5f - firstCard.pivot.x) * cardWidth;
 
@@ -58,7 +43,7 @@ public class OponentHandPanel : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            RectTransform child = transform.GetChild(i).GetComponent<RectTransform>();
+            RectTransform child = transform.GetChild(i).GetChild(0).GetComponent<RectTransform>();
             Vector3 targetPos = new Vector3(startX + i * spacing + pivotOffset, 0, 0);
             child.localPosition = targetPos;
         }

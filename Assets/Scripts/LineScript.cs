@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Photon.Pun;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,21 +18,22 @@ public class LineScript : MonoBehaviour
         {
         }
     }
-    public async Task TryAddCardOnLine(UnitSO unitSO)
+    [PunRPC()]
+    public async Task TryAddCardOnLine(UnitSO unitSO,bool Noticed)
     {
         if (heroOnLine >= 2)
         {
-            return ;
+            return;
         }
 
 
-        UnityEngine.Transform unitOnSceneTransform = Instantiate(unitSO.UnitPref);
+        GameObject unitOnSceneTransform = PhotonNetwork.Instantiate("Prefabs/" + unitSO.UnitPref.name, Vector3.zero, Quaternion.identity);
         UnitOnScene unitOnScene = unitOnSceneTransform.GetComponent<UnitOnScene>();
         unitOnScene.cardData = unitSO;
-        unitOnSceneTransform.SetParent(transform, false);
+        unitOnSceneTransform.transform.SetParent(transform, false);
 
         heroOnLine++;
-        _=unitOnScene.Initialize();
+        _ = unitOnScene.Initialize();
         List<Transform> allies = new List<Transform>();
         foreach (Transform transform in transform)
         {
@@ -130,7 +132,8 @@ public class LineScript : MonoBehaviour
             if (int.Parse(unit.Hp.text) > 0)
                 await unit.Attack();
         }
-    } public async Task StartUseSkills()
+    }
+    public async Task StartUseSkills()
     {
         var allUnits = new List<UnitOnScene>();
         foreach (Transform child in transform)

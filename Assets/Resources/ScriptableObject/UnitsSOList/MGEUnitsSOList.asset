@@ -15,3 +15,8 @@ MonoBehaviour:
   UnitsSoList:
   - {fileID: 11400000, guid: cdb767156f4b6f44bb168e2b35a28680, type: 2}
   - {fileID: 11400000, guid: 0500d800166a4a64a9de87dbd8e7314f, type: 2}
+  - {fileID: 11400000, guid: 13af1606f81814a4e93eb0fc46215e52, type: 2}
+  - {fileID: 11400000, guid: 8f1019ef9dbe9d0429fd848bc9a010de, type: 2}
+  - {fileID: 11400000, guid: 1c32f84d02aec6b44bca43b1b69ac1a1, type: 2}
+  - {fileID: 11400000, guid: 0593f3290fe0fd1408f26e7ab6123c78, type: 2}
+  - {fileID: 11400000, guid: ce72db0d0a9e0904a8efbe5c0d63384a, type: 2}

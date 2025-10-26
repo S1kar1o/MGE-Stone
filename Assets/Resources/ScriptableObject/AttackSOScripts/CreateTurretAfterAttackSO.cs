@@ -18,7 +18,7 @@ public class CreateTurretAfterAttackSO : AbilitySO
         {
             if (lineScript.CheckPosibilityToAddACard())
             {
-                await lineScript.TryAddCardOnLine(objectForSpawnFirstLevelData);
+                await lineScript.TryAddCardOnLine(objectForSpawnFirstLevelData, false);
                 waitingForNextTurn = !waitingForNextTurn;
                 return;
             }

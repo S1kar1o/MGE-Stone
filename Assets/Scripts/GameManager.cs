@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance { get; private set; }
 
-    [SerializeField]private Transform fatherForHeroes;
+    [SerializeField] private Transform fatherForHeroes;
     [SerializeField] private Vector2 heroTransform;          // Локальний герой (знизу)
     [SerializeField] private Vector2 opponentHeroTransform;  // Герой супротивника (зверху)
 
@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     private PhotonView photonView;
     private Transform enemyHero;
     private Transform owerHero;
-   [SerializeField] private UnitsSOList owerUnits;
-   [SerializeField] private UnitsSOList enemyUnits;
+    [SerializeField] private UnitsSOList owerUnits;
+    [SerializeField] private UnitsSOList enemyUnits;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -45,20 +45,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         yield return new WaitUntil(() => PhotonNetwork.InRoom && PhotonNetwork.IsConnectedAndReady);
         Debug.Log($"Гравець {PhotonNetwork.NickName} приєднався до кімнати. IsMasterClient: {PhotonNetwork.IsMasterClient}");
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            // Надсилання обом гравцям даних про героїв
-            photonView.RPC(nameof(SyncHeroes), RpcTarget.All, LocalHero.name, OpponentHero.name);
-        }
-        else
-        {
-            // Non-Master чекає на синхронізацію
-            Debug.Log("Non-Master чекає на дані про героїв...");
-        }
+        photonView.RPC(nameof(SpawnHeroes), RpcTarget.All, LocalHero.name, OpponentHero.name);
+
     }
 
     [PunRPC]
-    private void SyncHeroes(string localHeroName, string opponentHeroName)
+    private void SpawnHeroes(string localHeroName, string opponentHeroName)
     {
 
         LocalHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + localHeroName);
@@ -67,36 +59,60 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             // Ініціалізація свого героя
             owerHero = InitializeHero(heroTransform, LocalHero, true);
-            HandManager.Instance.unitSOList = owerUnits;
-            Debug.Log($"{PhotonNetwork.NickName} ініціалізував LocalHero: {LocalHero.name}");
+            int owerHeroId = owerHero.GetComponent<PhotonView>().ViewID;
+            SpawnManager.Instance.unitSOList = enemyUnits;
+            SpawnManager.Instance.enemySOList = owerUnits;
+
+
 
             // Ініціалізація опонента
             enemyHero = InitializeHero(opponentHeroTransform, OpponentHero, false);
-            Debug.Log($"{PhotonNetwork.NickName} ініціалізував OpponentHero: {OpponentHero.name}");
+            int EnemyHeroId = enemyHero.GetComponent<PhotonView>().ViewID;
+
+            photonView.RPC(nameof(SetPositionForOponent), RpcTarget.Others, EnemyHeroId, owerHeroId);
         }
         else
         {
-            // Ініціалізація свого героя
-            owerHero = InitializeHero(heroTransform, OpponentHero, true);
-            Debug.Log($"{PhotonNetwork.NickName} ініціалізував LocalHero: {OpponentHero.name}");
-            HandManager.Instance.unitSOList = enemyUnits;
 
-            // Ініціалізація опонента
-            enemyHero = InitializeHero(opponentHeroTransform, LocalHero, false);
-            Debug.Log($"{PhotonNetwork.NickName} ініціалізував OpponentHero: {LocalHero.name}");
+
+            SpawnManager.Instance.unitSOList = owerUnits;
+            SpawnManager.Instance.enemySOList = enemyUnits;
+
+
         }
     }
 
     private Transform InitializeHero(Vector2 target, HeroesSO data, bool isLocal)
     {
 
-        GameObject hero = PhotonNetwork.Instantiate("Prefabs/Heroes/"+data.HeroPref.name, Vector3.zero, Quaternion.identity);
+        GameObject hero = PhotonNetwork.Instantiate("Prefabs/Heroes/" + data.HeroPref.name, Vector3.zero, Quaternion.identity);
         hero.transform.SetParent(fatherForHeroes, false);
 
         hero.transform.SetSiblingIndex(0); // ставимо на найнижчу позицію в ієрархії
         hero.transform.localPosition = target;
 
         return hero.transform;
+    }
+    [PunRPC]
+    private void SetPositionForOponent(int oponentHeroId, int owerHeroId)
+    {
+        PhotonView pv = PhotonView.Find(oponentHeroId);
+        GameObject oponentHeroGameObject = pv.gameObject;
+
+        oponentHeroGameObject.transform.SetParent(fatherForHeroes, false);
+
+        oponentHeroGameObject.transform.SetSiblingIndex(0); // ставимо на найнижчу позицію в ієрархії
+        oponentHeroGameObject.transform.localPosition = heroTransform;
+        owerHero=oponentHeroGameObject.transform;
+        PhotonView pvOwer = PhotonView.Find(owerHeroId);
+        GameObject owerHeroGameObject = pvOwer.gameObject;
+
+        owerHeroGameObject.transform.SetParent(fatherForHeroes, false);
+
+        owerHeroGameObject.transform.SetSiblingIndex(0); // ставимо на найнижчу позицію в ієрархії
+        owerHeroGameObject.transform.localPosition = opponentHeroTransform;
+        enemyHero = owerHeroGameObject.transform;
+
     }
 
     public Transform GetEnemyHeroes() => enemyHero;

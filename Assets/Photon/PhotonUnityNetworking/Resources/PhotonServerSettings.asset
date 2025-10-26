@@ -68,6 +68,12 @@ MonoBehaviour:
   - SyncOpponentHero
   - AssignHero
   - SyncHeroes
+  - TryPlaceCard
+  - TryAddCardOnLine
+  - SpawnCard
+  - InitializeHeroes
+  - SpawnHeroes
+  - SetPositionForOponent
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
