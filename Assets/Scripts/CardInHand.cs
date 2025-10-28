@@ -32,13 +32,13 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
     public TextMeshProUGUI Damage;
     public TextMeshProUGUI Hp;
     public TextMeshProUGUI costText;
-    [SerializeField] private HeroOnScene owerUnit;
+    [SerializeField] private HeroOnScene ownerHero;
     [SerializeField] private Animator animator;
 
     [SerializeField] private Transform enemyVisual, ownerVisual;
     private void Start()
     {
-        owerUnit = GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>();
+        ownerHero = GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>();
         if (IsEnemyCard)
         {
             enemyVisual.gameObject.SetActive(true);
@@ -53,6 +53,8 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
     {
         if (IsEnemyCard)
         {
+            ownerHero = GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>();
+
             enemyVisual.gameObject.SetActive(true);
             this.enabled = false;
         }
@@ -84,7 +86,6 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
         {
             Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            // кидаємо променя ТІЛЬКИ по лейеру "Line"
             RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero, Mathf.Infinity, lineLayer);
 
             if (hit.collider != null)
@@ -94,8 +95,8 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
                 {
                     Debug.Log("Clicked line: " + targetLine.name);
                     int unitIndex = SpawnManager.Instance.unitSOList.UnitsSoList.IndexOf(cardData);
-
-                    photonView.RPC(nameof(TryPlaceCard), RpcTarget.All, targetLine.name, unitIndex);
+                    TryPlaceCard(targetLine.name, unitIndex, true);
+                    photonView.RPC(nameof(TryPlaceCard), RpcTarget.Others, targetLine.name, unitIndex, false);
 
                 }
             }
@@ -106,22 +107,37 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
         }
     }
     [PunRPC]
-    private void TryPlaceCard(string targetLineName, int unitIndexInList)
+    private void TryPlaceCard(string targetLineName, int unitIndexInList, bool isOwner)
     {
         GameObject targetLineGameObject = GameObject.Find(targetLineName);
         LineScript targetLine = targetLineGameObject.GetComponent<LineScript>();
-        UnitSO unitSO = SpawnManager.Instance.unitSOList.UnitsSoList[unitIndexInList];
+        UnitSO unitSO;
+        if (isOwner)
+            unitSO = SpawnManager.Instance.unitSOList.UnitsSoList[unitIndexInList];
+        else
+            unitSO = SpawnManager.Instance.enemySOList.UnitsSoList[unitIndexInList];
+
+
         if (cardData == null)
             cardData = unitSO;
 
-        if (int.Parse(owerUnit.Mana.text) >= int.Parse(costText.text))
+        if (int.Parse(ownerHero.Mana.text) >= cardData.cost)
         {
-            bool placed = PlaceOnLine(targetLine);
+            bool placed = PlaceOnLine(targetLine, isOwner);
             if (placed)
             {
                 selectedCard = null;
-                owerUnit.Mana.text = (int.Parse(owerUnit.Mana.text) - int.Parse(costText.text)).ToString();
-                HandManager.Instance.UpdateHand();
+                if (isOwner)
+                {
+                    ownerHero.Mana.text = (int.Parse(ownerHero.Mana.text) - int.Parse(costText.text)).ToString();
+                    HandManager.Instance.UpdateHand();
+                }
+                else
+                {
+                    GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text =
+                        (int.Parse(GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text) - int.Parse(costText.text)).ToString();
+                    OponentHandPanel.Instance.AlignChildren();
+                }
                 Destroy(gameObject);
             }
             else
@@ -181,15 +197,20 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
         }
     }
 
-    public bool PlaceOnLine(LineScript line)
+    public bool PlaceOnLine(LineScript line, bool isOwner)
     {
-        if (!isSelected) return false;
+        if (isOwner)
+            if (!isSelected) return false;
 
         DOKillAll();
         KillShake();
+        bool canPlace;
+        if (isOwner)
+            canPlace = line.CheckPosibilityToAddACard();
+        else
+            canPlace = line.CheckPosibilityToAddEnemyCard();
 
-        bool canPlace = line.CheckPosibilityToAddACard();
-        _ = line.TryAddCardOnLine(cardData, false);
+        _ = line.TryAddCardOnLine(cardData, isOwner);
         if (canPlace)
         {
             isSelected = false;

@@ -403,7 +403,7 @@ MonoBehaviour:
   Damage: {fileID: 5256319129541764958}
   Hp: {fileID: 832608381961750038}
   costText: {fileID: 8500569315491937561}
-  owerUnit: {fileID: 0}
+  ownerHero: {fileID: 0}
   animator: {fileID: 8419698790990911107}
   enemyVisual: {fileID: 3261277338778255801}
   ownerVisual: {fileID: 7936897021892231936}

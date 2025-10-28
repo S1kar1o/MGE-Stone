@@ -7,16 +7,23 @@ public class OponentHandPanel : MonoBehaviour
     [SerializeField] private float minSpacing = 30f;  // мінімальна відстань, коли карт багато
     [SerializeField] private Transform enemyCardPref;
     private RectTransform panel;
-
+    public static OponentHandPanel Instance;
     private void Awake()
     {
         panel = GetComponent<RectTransform>();
     }
     private void Start()
     {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+            Instance = this;
+
         AlignChildren();
     }
-  
+
     public void AlignChildren()
     {
         int count = transform.childCount;

@@ -5,26 +5,13 @@ using static TurnManager;
 
 public class LineController : MonoBehaviourPunCallbacks
 {
-    private PhotonView photonView;
-
-    private void Awake()
-    {
-        photonView = GetComponent<PhotonView>();
-        if (photonView == null)
-        {
-            photonView = gameObject.AddComponent<PhotonView>();
-            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
-        }
-    }
-
     private void Start()
     {
         TurnManager.Instance.TurnChanged += OnTurnChanged;
     }
-
     private async void OnTurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
     {
-        if (e.state != TurnState.Fighting || !PhotonNetwork.IsMasterClient) return;
+        if (e.state != TurnState.Fighting) return;
 
         foreach (Transform child in transform)
         {
@@ -38,6 +25,7 @@ public class LineController : MonoBehaviourPunCallbacks
 
         // Викликаємо наступний хід після завершення атак
         await Task.Yield();
-        TurnManager.Instance.photonView.RPC("StartNextTurn", RpcTarget.All);
+        if (PhotonNetwork.IsMasterClient)
+            TurnManager.Instance.photonView.RPC("StartNextTurn", RpcTarget.All);
     }
 }

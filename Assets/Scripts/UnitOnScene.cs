@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Photon.Pun;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
@@ -52,6 +53,7 @@ public class UnitOnScene : MonoBehaviour
         Damage.text = (int.Parse(Damage.text)+ damageBoost).ToString();
         //start anim Boost Damage
     }
+    [PunRPC()]
     public async Task GetDamage(int damage)
     {
         if (damage >= int.Parse(Hp.text))
@@ -179,7 +181,13 @@ public class UnitOnScene : MonoBehaviour
 
         if (enemy != null)
         {
-            animationOfGetDamageByEnemy = enemy.GetDamage(int.Parse(Damage.text));
+            if(PhotonNetwork.IsMasterClient)
+            {
+                animationOfGetDamageByEnemy = enemy.GetDamage(int.Parse(Damage.text));
+                transform.GetComponent<PhotonView>().RPC("GetDamage", RpcTarget.Others,int.Parse(Damage.text));
+
+                
+            }
         }
 
 

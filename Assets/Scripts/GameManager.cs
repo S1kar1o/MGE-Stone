@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [SerializeField] public HeroesSO LocalHero;
     [SerializeField] public HeroesSO OpponentHero;
-    private PhotonView photonView;
     private Transform enemyHero;
     private Transform owerHero;
     [SerializeField] private UnitsSOList owerUnits;
@@ -26,12 +25,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        photonView = GetComponent<PhotonView>();
-        if (photonView == null)
-        {
-            photonView = gameObject.AddComponent<PhotonView>();
-            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
-        }
+        
     }
 
     private void Start()
@@ -44,29 +38,38 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitUntil(() => PhotonNetwork.InRoom && PhotonNetwork.IsConnectedAndReady);
         Debug.Log($"Гравець {PhotonNetwork.NickName} приєднався до кімнати. IsMasterClient: {PhotonNetwork.IsMasterClient}");
-
-        photonView.RPC(nameof(SpawnHeroes), RpcTarget.All, LocalHero.name, OpponentHero.name);
-
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC(nameof(SpawnHeroes), RpcTarget.Others, LocalHero.name, OpponentHero.name, false);
+            SpawnHeroes(LocalHero.name, OpponentHero.name, true);
+        }
     }
 
     [PunRPC]
-    private void SpawnHeroes(string localHeroName, string opponentHeroName)
+    private void SpawnHeroes(string localHeroName, string opponentHeroName,bool isOwner)
     {
-
-        LocalHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + localHeroName);
-        OpponentHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + opponentHeroName);
+        if (!isOwner)
+        {
+            LocalHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + localHeroName);
+            OpponentHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + opponentHeroName);
+        }
+        else
+        {
+            OpponentHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + localHeroName);
+            LocalHero = Resources.Load<HeroesSO>("ScriptableObject/HeroesSO/" + opponentHeroName);
+        }
         if (!PhotonNetwork.IsMasterClient)
         {
             // Ініціалізація свого героя
-            owerHero = InitializeHero(heroTransform, LocalHero, true);
+            owerHero = InitializeHero(heroTransform, LocalHero);
             int owerHeroId = owerHero.GetComponent<PhotonView>().ViewID;
-            SpawnManager.Instance.unitSOList = enemyUnits;
-            SpawnManager.Instance.enemySOList = owerUnits;
+            SpawnManager.Instance.unitSOList = owerUnits;
+            SpawnManager.Instance.enemySOList = enemyUnits;
 
 
 
             // Ініціалізація опонента
-            enemyHero = InitializeHero(opponentHeroTransform, OpponentHero, false);
+            enemyHero = InitializeHero(opponentHeroTransform, OpponentHero);
             int EnemyHeroId = enemyHero.GetComponent<PhotonView>().ViewID;
 
             photonView.RPC(nameof(SetPositionForOponent), RpcTarget.Others, EnemyHeroId, owerHeroId);
@@ -75,14 +78,14 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
 
 
-            SpawnManager.Instance.unitSOList = owerUnits;
-            SpawnManager.Instance.enemySOList = enemyUnits;
+            SpawnManager.Instance.unitSOList = enemyUnits;
+            SpawnManager.Instance.enemySOList = owerUnits;
 
 
         }
     }
 
-    private Transform InitializeHero(Vector2 target, HeroesSO data, bool isLocal)
+    private Transform InitializeHero(Vector2 target, HeroesSO data)
     {
 
         GameObject hero = PhotonNetwork.Instantiate("Prefabs/Heroes/" + data.HeroPref.name, Vector3.zero, Quaternion.identity);

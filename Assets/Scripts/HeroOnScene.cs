@@ -13,18 +13,6 @@ public class HeroOnScene : MonoBehaviourPunCallbacks
     public Animator animator;
     public Fraction fraction;
 
-    private PhotonView photonView;
-
-    private void Awake()
-    {
-        photonView = GetComponent<PhotonView>();
-        if (photonView == null)
-        {
-            photonView = gameObject.AddComponent<PhotonView>();
-            photonView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber);
-        }
-        Debug.Log($"HeroOnScene.Awake на {gameObject.name}. PhotonView: {photonView}, cardImage: {cardImage}, Hp: {Hp}, Mana: {Mana}");
-    }
 
     public void Initialize(HeroesSO heroData)
     {

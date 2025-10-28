@@ -14,30 +14,26 @@ public class LineScript : MonoBehaviour
     private void Awake()
     {
         lineCollider = GetComponent<BoxCollider2D>();
-        if (lineCollider == null)
-        {
-        }
+        
     }
     [PunRPC()]
-    public async Task TryAddCardOnLine(UnitSO unitSO,bool Noticed)
+    public async Task TryAddCardOnLine(UnitSO unitSO,bool owerUnit)
     {
-        if (heroOnLine >= 2)
+        if(owerUnit)
         {
-            return;
+            heroOnLine++;
         }
-
 
         GameObject unitOnSceneTransform = PhotonNetwork.Instantiate("Prefabs/" + unitSO.UnitPref.name, Vector3.zero, Quaternion.identity);
         UnitOnScene unitOnScene = unitOnSceneTransform.GetComponent<UnitOnScene>();
         unitOnScene.cardData = unitSO;
         unitOnSceneTransform.transform.SetParent(transform, false);
-
-        heroOnLine++;
+        
         _ = unitOnScene.Initialize();
         List<Transform> allies = new List<Transform>();
         foreach (Transform transform in transform)
         {
-            if (transform.GetComponent<UnitOnScene>().cardData.Fraction == unitSO.Fraction)
+            if (transform.GetComponent<UnitOnScene>().cardData.Fraction == GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction)
             {
                 allies.Add(transform);
             }
@@ -46,6 +42,19 @@ public class LineScript : MonoBehaviour
         for (int i = 0; i < allies.Count; i++)
         {
             allies[i].SetSiblingIndex(i); // ставимо на відповідний індекс
+        } 
+        List<Transform> enemyes = new List<Transform>();
+        foreach (Transform transform in transform)
+        {
+            if (transform.GetComponent<UnitOnScene>().cardData.Fraction != GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction)
+            {
+                enemyes.Add(transform);
+            }
+        }
+        enemyes = enemyes.OrderBy(x => (int)x.GetComponent<UnitOnScene>().cardData.Type).ToList();
+        for (int i = 0; i < enemyes.Count; i++)
+        {
+            enemyes[i].SetSiblingIndex(i); // ставимо на відповідний індекс
         }
         await UpdateHeroPositions();
     }
@@ -53,7 +62,16 @@ public class LineScript : MonoBehaviour
     {
         return heroOnLine < 2;
     }
-
+    public bool CheckPosibilityToAddEnemyCard()
+    {
+        int i = 0;
+        foreach (Transform transform in transform)
+        {
+            if (transform.GetComponent<UnitOnScene>().fraction != GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction)
+                i++;
+        }
+        return i < 2;
+    }
     public async Task UpdateHeroPositions()
     {
         if (heroOnLine == 0) return;

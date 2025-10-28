@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Ability/CreateTurretAfterSO")]
@@ -18,7 +19,11 @@ public class CreateTurretAfterAttackSO : AbilitySO
         {
             if (lineScript.CheckPosibilityToAddACard())
             {
-                await lineScript.TryAddCardOnLine(objectForSpawnFirstLevelData, false);
+                bool isOwerUnit = (attacker.GetComponent<UnitOnScene>().fraction == GameManager.Instance.GetOwnerHeroes().GetComponent<HeroOnScene>().fraction);
+                if (isOwerUnit)
+                {
+                    await lineScript.TryAddCardOnLine(objectForSpawnFirstLevelData, isOwerUnit);
+                }
                 waitingForNextTurn = !waitingForNextTurn;
                 return;
             }
@@ -31,7 +36,7 @@ public class CreateTurretAfterAttackSO : AbilitySO
                     waitingForNextTurn = !waitingForNextTurn;
                     break;
                 }
-                else if(unitOnLine.cardData == objectForSpawnSecondLevelData)
+                else if (unitOnLine.cardData == objectForSpawnSecondLevelData)
                 {
                     await unitOnLine.ChangeUnitTo(objectForSpawnThirdLevelData);
                     waitingForNextTurn = !waitingForNextTurn;
