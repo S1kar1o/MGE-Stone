@@ -20,6 +20,7 @@ public class AttackFirstPersonOnLineSO : AttackActionSO
                
                 if (unitOnScene.fraction != attackerUnitOnScene.fraction && int.Parse(unitOnScene.Hp.text) > 0)
                 {
+
                     await attackerUnitOnScene.PlayAttackAnimationWithMove(unitOnScene.transform);
 
                     enemyInRow = true;
