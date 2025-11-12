@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UnitOnScene : MonoBehaviour
+public class UnitOnScene : MonoBehaviourPunCallbacks
 {
     public UnitSO cardData;
     [SerializeField] private AttackActionSO attackAction;
@@ -49,8 +49,9 @@ public class UnitOnScene : MonoBehaviour
             }
         }
     }
-    public void boostDamage(int damageBoost) {
-        Damage.text = (int.Parse(Damage.text)+ damageBoost).ToString();
+    public void boostDamage(int damageBoost)
+    {
+        Damage.text = (int.Parse(Damage.text) + damageBoost).ToString();
         //start anim Boost Damage
     }
     [PunRPC()]
@@ -58,7 +59,7 @@ public class UnitOnScene : MonoBehaviour
     {
         if (damage >= int.Parse(Hp.text))
         {
-          
+
             await DestroyCard();
         }
         else
@@ -109,7 +110,7 @@ public class UnitOnScene : MonoBehaviour
     }
     public async Task StartSkill()
     {
-        if (int.Parse(Hp.text) <= 0) return; 
+        if (int.Parse(Hp.text) <= 0) return;
         if (abilitySo != null)
         {
             if (abilitySo.multipleExecuted)
@@ -120,7 +121,7 @@ public class UnitOnScene : MonoBehaviour
     }
     public async Task Attack()
     {
-        if (int.Parse(Hp.text) <= 0) return; 
+        if (int.Parse(Hp.text) <= 0) return;
         if (abilitySo != null)
         {
             if (abilitySo.attackSkill)
@@ -132,7 +133,7 @@ public class UnitOnScene : MonoBehaviour
         {
             await attackAction.Execute(gameObject);
         }
-        
+
     }
     public async Task PlayAttackAnimationWithMove(Transform target)
     {
@@ -156,7 +157,6 @@ public class UnitOnScene : MonoBehaviour
         animatorController.SetTrigger(nameOfTrigger);
 
         int attackHash = Animator.StringToHash("Base Layer." + nameOfTrigger);
-
         while (animatorController.GetCurrentAnimatorStateInfo(0).fullPathHash != attackHash)
             await Task.Yield();
 
@@ -181,13 +181,9 @@ public class UnitOnScene : MonoBehaviour
 
         if (enemy != null)
         {
-            if(PhotonNetwork.IsMasterClient)
-            {
-                animationOfGetDamageByEnemy = enemy.GetDamage(int.Parse(Damage.text));
-                transform.GetComponent<PhotonView>().RPC("GetDamage", RpcTarget.Others,int.Parse(Damage.text));
 
-                
-            }
+            animationOfGetDamageByEnemy = enemy.GetDamage(int.Parse(Damage.text));
+
         }
 
 

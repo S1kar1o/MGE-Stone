@@ -61,12 +61,6 @@ public class HeroOnScene : MonoBehaviourPunCallbacks
 
     public void GetDamage(int damage)
     {
-        photonView.RPC("SyncGetDamage", RpcTarget.All, damage);
-    }
-
-    [PunRPC]
-    private void SyncGetDamage(int damage)
-    {
         if (damage >= int.Parse(Hp.text))
         {
             CongratulationMenu.Instance.EndGamePanel(this);
@@ -81,4 +75,6 @@ public class HeroOnScene : MonoBehaviourPunCallbacks
             Hp.text = (int.Parse(Hp.text) - damage).ToString();
         }
     }
+
+    
 }

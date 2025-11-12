@@ -79,6 +79,7 @@ MonoBehaviour:
   - RPC_ApplyDamage
   - RPC_PlayAttackAnim
   - RPC_UpdatePositions
+  - StartFightRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

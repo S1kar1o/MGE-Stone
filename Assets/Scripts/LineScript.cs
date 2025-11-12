@@ -8,27 +8,28 @@ using UnityEngine;
 public class LineScript : MonoBehaviour
 {
     private int heroOnLine = 0;
+    private int enemyUnitsOnLine = 0;
     private BoxCollider2D lineCollider;
     [SerializeField] private List<Vector2> enemyPositionOnLine = new List<Vector2>();
 
     private void Awake()
     {
         lineCollider = GetComponent<BoxCollider2D>();
-        
+
     }
     [PunRPC()]
-    public async Task TryAddCardOnLine(UnitSO unitSO,bool owerUnit)
+    public async Task TryAddCardOnLine(UnitSO unitSO, bool owerUnit)
     {
-        if(owerUnit)
-        {
+        if (owerUnit)
             heroOnLine++;
-        }
+        else
+            enemyUnitsOnLine++;
 
         GameObject unitOnSceneTransform = PhotonNetwork.Instantiate("Prefabs/" + unitSO.UnitPref.name, Vector3.zero, Quaternion.identity);
         UnitOnScene unitOnScene = unitOnSceneTransform.GetComponent<UnitOnScene>();
         unitOnScene.cardData = unitSO;
         unitOnSceneTransform.transform.SetParent(transform, false);
-        
+
         _ = unitOnScene.Initialize();
         List<Transform> allies = new List<Transform>();
         foreach (Transform transform in transform)
@@ -42,7 +43,7 @@ public class LineScript : MonoBehaviour
         for (int i = 0; i < allies.Count; i++)
         {
             allies[i].SetSiblingIndex(i); // ставимо на відповідний індекс
-        } 
+        }
         List<Transform> enemyes = new List<Transform>();
         foreach (Transform transform in transform)
         {
@@ -74,7 +75,7 @@ public class LineScript : MonoBehaviour
     }
     public async Task UpdateHeroPositions()
     {
-        if (heroOnLine == 0) return;
+        if (heroOnLine == 0&& enemyUnitsOnLine==0) return;
 
         Vector2 colliderSize = lineCollider.size;
         float halfHeight = colliderSize.y / 2f;

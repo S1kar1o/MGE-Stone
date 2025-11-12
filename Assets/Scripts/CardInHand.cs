@@ -95,9 +95,16 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
                 {
                     Debug.Log("Clicked line: " + targetLine.name);
                     int unitIndex = SpawnManager.Instance.unitSOList.UnitsSoList.IndexOf(cardData);
-                    TryPlaceCard(targetLine.name, unitIndex, true);
-                    photonView.RPC(nameof(TryPlaceCard), RpcTarget.Others, targetLine.name, unitIndex, false);
-
+                    if (int.Parse(ownerHero.Mana.text) >= cardData.cost)
+                    {
+                        TryPlaceCard(targetLine.name, unitIndex, true);
+                        photonView.RPC(nameof(TryPlaceCard), RpcTarget.Others, targetLine.name, unitIndex, false);
+                    }
+                    else
+                    {
+                        animator.SetTrigger("NotEnoughtManaTrigger");
+                        Debug.Log("Failed to place card on line: " + targetLine.name);
+                    }
                 }
             }
             else
@@ -121,30 +128,23 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
         if (cardData == null)
             cardData = unitSO;
 
-        if (int.Parse(ownerHero.Mana.text) >= cardData.cost)
+
+        bool placed = PlaceOnLine(targetLine, isOwner);
+        if (placed)
         {
-            bool placed = PlaceOnLine(targetLine, isOwner);
-            if (placed)
+            selectedCard = null;
+            if (isOwner)
             {
-                selectedCard = null;
-                if (isOwner)
-                {
-                    ownerHero.Mana.text = (int.Parse(ownerHero.Mana.text) - int.Parse(costText.text)).ToString();
-                    HandManager.Instance.UpdateHand();
-                }
-                else
-                {
-                    GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text =
-                        (int.Parse(GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text) - int.Parse(costText.text)).ToString();
-                    OponentHandPanel.Instance.AlignChildren();
-                }
-                Destroy(gameObject);
+                ownerHero.Mana.text = (int.Parse(ownerHero.Mana.text) - unitSO.cost).ToString();
+                HandManager.Instance.UpdateHand();
             }
             else
             {
-                animator.SetTrigger("NotEnoughtManaTrigger");
-                Debug.Log("Failed to place card on line: " + targetLine.name);
+                GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text =
+                    (int.Parse(GameManager.Instance.GetEnemyHeroes().GetComponent<HeroOnScene>().Mana.text) - unitSO.cost).ToString();
+                OponentHandPanel.Instance.AlignChildren();
             }
+            Destroy(gameObject);
         }
         else
         {
@@ -222,6 +222,11 @@ public class CardInHand : MonoBehaviourPunCallbacks, IPointerEnterHandler, IPoin
             if (handManager != null)
             {
                 handManager.UpdateHand();
+            }
+            else
+            {
+                OponentHandPanel oponentHandPanel = GetComponentInParent<OponentHandPanel>();
+                oponentHandPanel.AlignChildren();
             }
         }
 
