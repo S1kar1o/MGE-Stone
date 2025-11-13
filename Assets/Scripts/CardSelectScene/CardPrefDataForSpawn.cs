@@ -35,7 +35,7 @@ public class CardPrefDataForSpawn : MonoBehaviour, IPointerClickHandler
         IsSelected = !IsSelected;
         if (IsSelected)
         {
-            SelectedCardLogic.Instance.SelectedCard = gameObject.transform;
+            SelectedCardLogic.Instance.selectedCard = gameObject.transform;
         }
     }
 }

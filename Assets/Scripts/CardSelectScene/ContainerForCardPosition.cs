@@ -9,7 +9,8 @@ public class ContainerForCardPosition : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Transform defaultCardTrans;
     private Transform cardObject;
     private Transform currentCard;
-
+    private const float cardWidth = 140;
+    private const float cardHeight = 167;
     public int unitID;
 
 
@@ -28,38 +29,49 @@ public class ContainerForCardPosition : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        cardObject = SelectedCardLogic.Instance.SelectedCard;
+        cardObject = SelectedCardLogic.Instance.selectedCard;
         if (cardObject.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn cardDataForSpawn))
         {
+
             savedCard = cardDataForSpawn.cardData;
             indexUnitSOinList = SelectedCardLogic.Instance.unitsSOList.UnitsSoList.IndexOf(savedCard);
             PlayerPrefs.SetInt($"indexUnitSOinList_{unitID}", indexUnitSOinList);
             PlayerPrefs.Save();
             Debug.Log(PlayerPrefs.GetInt($"indexUnitSOinList_{unitID}", defaultValue));
         }
-        if(currentCard!= null)
+        if (currentCard != null)
         {
-            currentCard.SetParent(SelectedCardLogic.Instance.CardSequel);
+            currentCard.SetParent(SelectedCardLogic.Instance.cardSequel);
+            currentCard.GetComponent<CardPrefDataForSpawn>().enabled = true;
         }
-        currentCard= cardObject;
+        currentCard = cardObject;
         SetCardPosAndParentThisObject(cardObject);
+        RectTransform recTransformOfCard = cardObject.GetComponent<RectTransform>();
+        recTransformOfCard.sizeDelta = new Vector2(cardWidth, cardHeight);
+        cardObject.GetComponent<CardPrefDataForSpawn>().enabled = false;
 
     }
     private void LoadCardFromUnitsList(int index)
     {
         if (cardObject == null)
         {
-            Transform newCard= Instantiate(defaultCardTrans);
-            if (newCard.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn cardPrefData)){
-                cardPrefData.cardData= SelectedCardLogic.Instance.unitsSOList.UnitsSoList[index];
+            Transform newCard = Instantiate(defaultCardTrans);
+            currentCard = newCard;
+            RectTransform recTransformOfCard = newCard.GetComponent<RectTransform>();
+            recTransformOfCard.sizeDelta = new Vector2(cardWidth, cardHeight);
+
+            if (newCard.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn cardPrefData))
+            {
+                cardPrefData.cardData = SelectedCardLogic.Instance.unitsSOList.UnitsSoList[index];
                 cardPrefData.Initialize();
+                cardPrefData.GetComponent<CardPrefDataForSpawn>().enabled = false;
                 SetCardPosAndParentThisObject(newCard);
             }
         }
     }
     private void SetCardPosAndParentThisObject(Transform card)
     {
-        card.SetParent(transform);
+        card.SetParent(transform, false);
         card.transform.position = Vector2.zero;
     }
 }
