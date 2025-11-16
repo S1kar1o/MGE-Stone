@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System.Collections.Generic;
 using UnityEngine;
 using static TurnManager;
 
@@ -9,6 +10,7 @@ public class SpawnManager : MonoBehaviourPun
     public UnitsSOList unitSOList;
     public UnitsSOList enemySOList;
 
+    private List<UnitSO> selectedUnits;
     public static SpawnManager Instance;
     private void Awake()
     {
@@ -20,7 +22,7 @@ public class SpawnManager : MonoBehaviourPun
     private void Start()
     {
         TurnManager.Instance.TurnChanged += On_TurnChanged;
-
+        selectedUnits=SaveSelectedCardsToGame.Instance.GetSelectedUnits();
     }
     private void On_TurnChanged(object sender, TurnManager.OnStateChangedEventArgs e)
     {
@@ -32,9 +34,14 @@ public class SpawnManager : MonoBehaviourPun
 
     public void DrawCard()
     {
+       
+        int index = UnityEngine.Random.Range(0, selectedUnits.Count);
+        Debug.Log(selectedUnits[index].name);
+        Debug.Log(selectedUnits[index]);
+        int globalIndex = unitSOList.UnitsSoList.IndexOf(selectedUnits[index]);
+        Debug.Log(unitSOList.UnitsSoList.IndexOf(selectedUnits[index]));
 
-        int index = UnityEngine.Random.Range(0, unitSOList.UnitsSoList.Count);
-        SpawnCard(index, false, -1);
+        SpawnCard(globalIndex, false, -1);
 
     }
     [PunRPC()]

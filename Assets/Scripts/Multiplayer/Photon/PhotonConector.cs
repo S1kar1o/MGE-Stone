@@ -9,14 +9,21 @@ public class PhotonConector : MonoBehaviourPunCallbacks
     [SerializeField] private string lobbySceneName = "MenuScene"; // Назва сцени лобі
     [SerializeField] private string playableSceneName = "PlaybleScene"; // Назва сцени гри
     private bool isRoomFull = false;
-
+    public static PhotonConector instance;
+    private void Awake()
+    {
+        if (instance == null) {
+            instance = this;
+            DontDestroyOnLoad(gameObject); }
+        else
+            Destroy(gameObject);
+    }
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
 
         // Підключення до Photon
         PhotonNetwork.ConnectUsingSettings();
-        DontDestroyOnLoad(gameObject);
         Debug.Log("Починаємо підключення до Photon...");
     }
 
@@ -28,6 +35,7 @@ public class PhotonConector : MonoBehaviourPunCallbacks
     }
     public void StartBatle()
     {
+        Debug.Log(1212);
         PhotonNetwork.JoinRandomRoom();
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -84,21 +92,21 @@ public class PhotonConector : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("Покинув кімнату. Повертаємося до лобі...");
-        SceneManager.LoadScene(lobbySceneName);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(lobbySceneName);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.LogError($"Відключено від Photon: {cause}");
-        SceneManager.LoadScene(lobbySceneName);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(lobbySceneName);
     }
 
-    private void OnDestroy()
+   /* private void OnDestroy()
     {
         // Відключаємося від Photon при знищенні об'єкта
         if (PhotonNetwork.IsConnected)
         {
             PhotonNetwork.Disconnect();
         }
-    }
+    }*/
 }

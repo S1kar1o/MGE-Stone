@@ -8,13 +8,14 @@ using UnityEngine.UI;
 public class CardPrefDataForSpawn : MonoBehaviour, IPointerClickHandler
 {
     public UnitSO cardData;
+    public HeroesSO heroeSO;
     public Image cardImage;
     public TextMeshProUGUI Damage;
     public TextMeshProUGUI Hp;
     public TextMeshProUGUI costText;
     private bool IsSelected = false;
 
-    public void Initialize(UnitSO unitSO)
+    public void InitializeUnit(UnitSO unitSO)
     {
         cardData = unitSO;
         if (cardData != null)
@@ -22,20 +23,44 @@ public class CardPrefDataForSpawn : MonoBehaviour, IPointerClickHandler
             cardImage.sprite = cardData.cardSprite;
             Damage.text = cardData.Damage.ToString();
             Hp.text = cardData.Hp.ToString();
-            costText.text = cardData.cost.ToString();
 
         }
     }
-    public void Initialize()
+    public void InitializeHero(HeroesSO heroeSO)
     {
-        Initialize(cardData);
+        this.heroeSO = heroeSO;
+        if (heroeSO != null)
+        {
+            cardImage.sprite = heroeSO.cardSprite;
+            //Damage.text = heroeSO.Damage.ToString();
+            Hp.text = heroeSO.Hp.ToString();
+        }
+    }
+    public void InitializeHero()
+    {
+        InitializeHero(heroeSO);
+    }
+    public void InitializeUnit()
+    {
+        InitializeUnit(cardData);
     }
     public void OnPointerClick(PointerEventData eventData)
     {
         IsSelected = !IsSelected;
         if (IsSelected)
         {
-            SelectedCardLogic.Instance.selectedCard = gameObject.transform;
+            if (heroeSO != null)
+                SelectedCardLogic.Instance.selectedHero = transform;
+            else
+                SelectedCardLogic.Instance.selectedCard = transform;
+        }
+        else
+        {
+            if (heroeSO != null)
+                SelectedCardLogic.Instance.selectedHero = null;
+            else
+                SelectedCardLogic.Instance.selectedCard = null;
+
         }
     }
 }

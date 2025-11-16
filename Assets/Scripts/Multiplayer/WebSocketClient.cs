@@ -38,7 +38,7 @@ public class WebSocketClient : MonoBehaviour
             UnityMainThreadDispatcher.Instance().Enqueue(() => OnNotificationReceived?.Invoke("WebSocket connected successfully"));
 
             // Переключення на ігрову сцену після успішного підключення
-            UnityMainThreadDispatcher.Instance().Enqueue(() => SceneManager.LoadScene("MenuScene")); // Виконуємо в головному потоці
+            UnityMainThreadDispatcher.Instance().Enqueue(() => UnityEngine.SceneManagement.SceneManager.LoadScene("MenuScene")); // Виконуємо в головному потоці
 
             // Запускаємо асинхронне отримання повідомлень
             await ReceiveMessages();
