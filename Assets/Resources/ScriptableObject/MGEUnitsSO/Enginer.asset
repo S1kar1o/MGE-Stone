@@ -16,7 +16,7 @@ MonoBehaviour:
   Damage: 2
   cost: 4
   cardSprite: {fileID: 21300000, guid: a8c89e2f064fbd84bafe76f4e2d36ed2, type: 3}
-  cardName: 
+  cardName: Enginer
   UnitPref: {fileID: 6660218741132165414, guid: 0c2dcdbf4ffcc1b4f865e10f882eec00, type: 3}
   HeroDescription: 
   Fraction: 0

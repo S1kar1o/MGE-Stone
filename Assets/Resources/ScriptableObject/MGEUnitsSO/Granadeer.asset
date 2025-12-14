@@ -16,7 +16,7 @@ MonoBehaviour:
   Damage: 0
   cost: 3
   cardSprite: {fileID: 21300000, guid: d63c51a7d8c7e784fb841db56e6229b0, type: 3}
-  cardName: 
+  cardName: Granadeer
   UnitPref: {fileID: 6660218741132165414, guid: 0c2dcdbf4ffcc1b4f865e10f882eec00, type: 3}
   HeroDescription: 
   Fraction: 0

@@ -37,6 +37,9 @@ public class AuthUIManager : MonoBehaviour
 */            Debug.Log($"Регистрация успешна! ID: {response.id}");
             PlayerPrefs.SetString("AccessToken", response.accessToken);
 
+            PlayerPrefs.SetString("UserId", response.id);
+            PlayerPrefs.Save();
+
             // Асинхронне підключення до WebSocket
             await webSocketClient.Connect(response.id);
         });
@@ -65,6 +68,10 @@ public class AuthUIManager : MonoBehaviour
 /*            statusText.text = $"Вход успешен! ID: {response.id}";
 */            Debug.Log($"Вход успешен! ID: {response.id}");
             PlayerPrefs.SetString("AccessToken", response.accessToken);
+
+            PlayerPrefs.SetString("UserId", response.id);
+            PlayerPrefs.Save();
+
             await webSocketClient.Connect(response.id);
         });
     }

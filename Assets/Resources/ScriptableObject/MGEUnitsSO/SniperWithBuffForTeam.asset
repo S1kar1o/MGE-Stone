@@ -16,10 +16,10 @@ MonoBehaviour:
   Damage: 1
   cost: 2
   cardSprite: {fileID: 21300000, guid: dfbe77b4a050d1646accba1943a7fe6c, type: 3}
-  cardName: 
+  cardName: SniperWithBuffForTeam
   UnitPref: {fileID: 6660218741132165414, guid: 0c2dcdbf4ffcc1b4f865e10f882eec00, type: 3}
   HeroDescription: 
   Fraction: 0
   Type: 3
   attackAction: {fileID: 11400000, guid: d189907aeb92f2747b2dfd2be44455a1, type: 2}
-  actionOnStart: {fileID: 0}
+  abilityAction: {fileID: 0}

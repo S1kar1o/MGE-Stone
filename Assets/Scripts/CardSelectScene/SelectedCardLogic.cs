@@ -97,8 +97,9 @@ public class SelectedCardLogic : MonoBehaviour
             }
             else if (card.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero container))
             {
-                Debug.Log(121);
-                hero = container.GetHeroSo();
+                CardPrefDataForSpawn cardData = cardContainer.currentCard.GetComponent<CardPrefDataForSpawn>();
+
+                hero = cardData.heroeSO;
             }
         }
         SaveSelectedCardsToGame.Instance.SaveSelectedCards(list, hero);
