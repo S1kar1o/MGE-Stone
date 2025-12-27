@@ -8,7 +8,7 @@ public class ContainerForSelectHero : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private Transform defaultCardTrans;
     private Transform cardObject;
-    private Transform currentCard;
+    public Transform currentCard;
     private const float cardWidth = 190;
     private const float cardHeight = 260;
     [SerializeField] private string aditional;
@@ -29,7 +29,7 @@ public class ContainerForSelectHero : MonoBehaviour, IPointerClickHandler
         cardObject.GetComponent<CardPrefDataForSpawn>().enabled = false;
 
     }
-    private void SetCardPosAndParentThisObject(Transform card)
+    public void SetCardPosAndParentThisObject(Transform card)
     {
         card.SetParent(transform, false);
         card.transform.position = Vector2.zero;

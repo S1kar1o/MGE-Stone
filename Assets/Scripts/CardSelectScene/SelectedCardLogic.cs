@@ -25,8 +25,8 @@ public class SelectedCardLogic : MonoBehaviour
     [SerializeField] public HeroesSOList mgeHeroesListSO;
     [SerializeField] public HeroesSOList furryHeroesListSO;
 
-    [SerializeField] private Transform groupOfMge;
-    [SerializeField] private Transform groupOfFurry;
+    [SerializeField] public Transform groupOfMge;
+    [SerializeField] public Transform groupOfFurry;
     public bool isMge = true;
     private bool isHeroes = false;
     private const string MGEFractionSelectedString = "MGEFractionSelected";
@@ -97,7 +97,7 @@ public class SelectedCardLogic : MonoBehaviour
             }
             else if (card.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero container))
             {
-                CardPrefDataForSpawn cardData = cardContainer.currentCard.GetComponent<CardPrefDataForSpawn>();
+                CardPrefDataForSpawn cardData = container.currentCard.GetComponent<CardPrefDataForSpawn>();
 
                 hero = cardData.heroeSO;
             }

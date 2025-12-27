@@ -784,6 +784,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultCardTrans: {fileID: 4890332150674698499, guid: 88e6a745f0562b3408b66f663501cd96, type: 3}
+  currentCard: {fileID: 0}
   aditional: Furry
 --- !u!114 &341230003
 MonoBehaviour:
@@ -1518,6 +1519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultCardTrans: {fileID: 3748499729819141221, guid: 88e6a745f0562b3408b66f663501cd96, type: 3}
+  currentCard: {fileID: 0}
   aditional: Mge
 --- !u!1 &754011505
 GameObject:
@@ -2874,6 +2876,8 @@ MonoBehaviour:
   - {fileID: 1571557039}
   - {fileID: 920276260}
   - {fileID: 1440122093}
+  MGE_Heroes_Container: {fileID: 748158611}
+  Furry_Heroes_Container: {fileID: 341230001}
 --- !u!4 &1380178811
 Transform:
   m_ObjectHideFlags: 0

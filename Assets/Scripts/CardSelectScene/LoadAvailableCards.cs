@@ -16,36 +16,58 @@ public class LoadAvailbleCards : MonoBehaviour
     [SerializeField] private UnitsSOList MGEUnits;
     [SerializeField] private UnitsSOList FurryUnits;
 
+
     [SerializeField] private Button test;
     private bool MGEFractionSelected = true; private const string MGEFractionSelectedString = "MGEFractionSelected";
 
-    public List<Item> loadedMGEUnits;
-    public List<Item> loadedFurryUnits;
+    public List<UnitDeserialized> loadedMGEUnits;
+    public List<UnitDeserialized> loadedFurryUnits;
 
-    public class Item
+    public List<HeroDeserialized> loadedMGEHeroes;
+    public List<HeroDeserialized> loadedFurryHeroes;
+
+    public class UnitDeserialized
     {
         public int Id { get; set; }
         public UnitSO Card { get; set; }
-        public Item(int id,UnitSO card)
+        public UnitDeserialized(int id, UnitSO card)
         {
             this.Id = id;
             this.Card = card;
-        } 
-        public Item(UnitSO card):this(0,card) {}
+        }
+        public UnitDeserialized(UnitSO card) : this(0, card) { }
+    }
+    public class HeroDeserialized
+    {
+        public bool isSelected{ get; set; }
+        public HeroesSO Hero { get; set; }
+        public HeroDeserialized(bool isSelected, HeroesSO hero)
+        {
+            this.isSelected=isSelected;
+            this.Hero = hero;
+        }
+        public HeroDeserialized(HeroesSO card) : this(false, card) { }
     }
 
     [System.Serializable]
     public class CardListResponse
     {
-        public string userId;
-        public CardObject[] cards; // ⚠ НЕ List
+        public Guid UserId { get; set; }
+        public CardObject[] Cards { get; set; }
+        public HeroObject[] Heroes { get; set; }
     }
 
     [System.Serializable]
     public class CardObject
     {
         public string name;
-        public int positionInDeck; // ⚠ НЕ short
+        public int positionInDeck;
+    }
+    [System.Serializable]
+    public class HeroObject
+    {
+        public string Name { get; set; }
+        public bool isSelected { get; set; }
     }
 
     void Start()
@@ -79,7 +101,7 @@ public class LoadAvailbleCards : MonoBehaviour
     private IEnumerator GetCardsFlow(string userId)
     {
         yield return StartCoroutine(GetCardsCoroutine(userId));
-       // yield return StartCoroutine(CreateLoadedCard());
+        // yield return StartCoroutine(CreateLoadedCard());
     }
 
     private IEnumerator GetCardsCoroutine(string userId)
@@ -89,23 +111,29 @@ public class LoadAvailbleCards : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            loadedMGEUnits = new List<Item>();
+            loadedMGEUnits = new List<UnitDeserialized>();
 
-            loadedFurryUnits = new List<Item>();
+            loadedFurryUnits = new List<UnitDeserialized>();
+
+            loadedMGEHeroes = new List<HeroDeserialized>();
+
+            loadedFurryHeroes = new List<HeroDeserialized>();
 
             var response = JsonUtility.FromJson<CardListResponse>(request.downloadHandler.text);
-            foreach (var loadedCard in response.cards)
+            Debug.Log(response);
+            foreach (var loadedCard in response.Cards)
             {
                 bool find = false;
                 foreach (UnitSO unit in MGEUnits.UnitsSoList)
                 {
+                    Debug.Log(121);
                     if (unit.name == loadedCard.name)
                     {
                         Debug.Log($"{unit.name}");
 
                         if (loadedCard.positionInDeck == 0)
                         {
-                            Item item = new Item(unit);
+                            UnitDeserialized item = new UnitDeserialized(unit);
                             loadedMGEUnits.Add(item);
                             find = true;
                             break;
@@ -121,30 +149,56 @@ public class LoadAvailbleCards : MonoBehaviour
                     {
                         if (loadedCard.positionInDeck == 0)
                         {
-                            Item item = new Item(unit);
+                            UnitDeserialized item = new UnitDeserialized(unit);
                             loadedFurryUnits.Add(item);
                             break;
                         }
                     }
                 }
             }
+            foreach(var loadedHeroes in response.Heroes)
+            {
+                bool find = false;
+                foreach (HeroesSO unit in MGEHeroes.list)
+                {
+                    if (unit.name == loadedHeroes.Name)
+                    {
+                        Debug.Log($"{unit.name}");
+
+                        if (loadedHeroes.isSelected)
+                        {
+                            HeroDeserialized item = new HeroDeserialized(unit);
+                            loadedMGEHeroes.Add(item);
+                            find = true;
+                            break;
+                        }
+
+                    }
+                }
+                if (find)
+                    continue;
+                foreach (HeroesSO unit in FurryHeroes.list)
+                {
+                    if (unit.name == loadedHeroes.Name)
+                    {
+                        if (loadedHeroes.isSelected)
+                        {
+                            HeroDeserialized item = new HeroDeserialized(unit);
+                            loadedFurryHeroes.Add(item);
+                            break;
+                        }
+                    }
+                }
+            }
             Debug.Log("evvent");
-            loadingCardEnded?.Invoke(this,EventArgs.Empty);
+            loadingCardEnded?.Invoke(this, EventArgs.Empty);
         }
         else
         {
             Debug.LogError(request.error);
         }
     }
-/*    private IEnumerator CreateLoadedCard()//errrrrrrrrrooooorrrrr
-    {
-        foreach (UnitSO unit in loadedMGEUnits.UnitsSoList)
-            SpawnCard(unit);
-        foreach (UnitSO unit in loadedFurryUnits.UnitsSoList)
-            SpawnCard(unit);
-        yield return null;
-    }*/
-    //parser
+    
     private UnitSO GetUnitFromList(string Name)
     {
         if (MGEFractionSelected)
@@ -186,7 +240,7 @@ public class LoadAvailbleCards : MonoBehaviour
         }
         return null;
     }
-   
+
     private void SpawnHeroes(HeroesSO heroData)
     {
         Transform card = Instantiate(SpawnHeroObject);
