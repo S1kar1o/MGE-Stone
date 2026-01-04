@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class LoginLogic : MonoBehaviour
 {
     private const string baseUrl = "https://mge-server.onrender.com";
-
+    private string userId;
     [Serializable]
     public class RegisterRequest
     {
@@ -30,12 +30,20 @@ public class LoginLogic : MonoBehaviour
         public string email;
         public string accessToken;
     }
-
+    public static LoginLogic instance;
+    private void Start()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+            Destroy(gameObject);
+    }
     public void Register(string email, string password, string username, Action<AuthResponse, string> callback)
     {
         var requestData = new RegisterRequest { email = email, password = password, username = username };
         string jsonData = JsonUtility.ToJson(requestData);
-        Debug.Log($"Отправляемый JSON (Register): {jsonData}");
 
         StartCoroutine(SendRequest($"{baseUrl}/auth/registrate", jsonData, callback));
     }
@@ -44,7 +52,6 @@ public class LoginLogic : MonoBehaviour
     {
         var requestData = new LoginRequest { email = email, password = password };
         string jsonData = JsonUtility.ToJson(requestData);
-        Debug.Log($"Отправляемый JSON (Login): {jsonData}");
 
         StartCoroutine(SendRequest($"{baseUrl}/auth/login", jsonData, callback));
     }
@@ -81,7 +88,10 @@ public class LoginLogic : MonoBehaviour
                     callback(null, "Не вдалося десеріалізувати відповідь сервера");
                     yield break;
                 }
-                Debug.Log($"Response: {request.downloadHandler.text}");
+
+                userId = response.id;
+                Debug.Log(userId);
+
                 callback(response, null);
             }
             catch (Exception ex)
@@ -90,5 +100,9 @@ public class LoginLogic : MonoBehaviour
                 callback(null, $"Помилка десеріалізації: {ex.Message}");
             }
         }
+    }
+    public string GetUserId()
+    {
+        return userId;
     }
 }

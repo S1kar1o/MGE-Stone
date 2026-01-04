@@ -32,8 +32,13 @@ public class ContainerForCardPosition : MonoBehaviour, IPointerClickHandler
     }
     private void SetCardPosAndParentThisObject(Transform card)
     {
-        card.SetParent(transform, false);
-        card.transform.position = Vector2.zero;
+        card.SetParent(transform,false);
+        RectTransform recTransformOfCard = card.GetComponent<RectTransform>();
+
+
+        recTransformOfCard.sizeDelta = new Vector2(cardWidth, cardHeight);
+        recTransformOfCard.anchoredPosition = Vector2.zero;
+
     }
     public void SetSelectedCard(Transform card)
     {

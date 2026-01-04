@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CardSelectScene.unity
     guid: 0b2a1ad2e90978440a4dd6cfd31e4541
+  - enabled: 1
+    path: Assets/Scenes/ShopScene.unity
+    guid: 11d894bd24de79f4b92c656a9b6b2f7f
   m_configObjects:
     com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: dcafc746c49e24340b2d97b4688f157a, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 25ddfb184c7d08f4da3982dc5d078cdc, type: 2}

@@ -29,7 +29,6 @@ public class SelectedCardLogic : MonoBehaviour
     [SerializeField] public Transform groupOfFurry;
     public bool isMge = true;
     private bool isHeroes = false;
-    private const string MGEFractionSelectedString = "MGEFractionSelected";
     public static SelectedCardLogic Instance { get; private set; }
     private void Awake()
     {
@@ -37,7 +36,6 @@ public class SelectedCardLogic : MonoBehaviour
     }
     private void Start()
     {
-        //isMge = PlayerPrefs.GetInt(MGEFractionSelectedString, 0) == 1;
         heroesButton.onClick.AddListener(() => { SwitchToGroup(isMge ? mgeHeroesGroup : furryHeroesGroup); isHeroes = true; });
         unitsButton.onClick.AddListener(() => { SwitchToGroup(isMge ? mgeUnitsGroup : furryUnitsGroup); isHeroes = false; });
         mgeFractionSelectedButton.onClick.AddListener(() =>
@@ -57,14 +55,6 @@ public class SelectedCardLogic : MonoBehaviour
             SceneLoader.Instance.LoadScene(sceneNameToChange);
         });
     }
-    public void SetSelectedCard(Transform card)
-    {
-        selectedCard = card;
-    }
-    public void SetSelectedHero(Transform heroCard)
-    {
-        selectedHero = heroCard;
-    }
     public void SwitchToGroup(Transform transform)
     {
         currentGroup.gameObject.SetActive(false);
@@ -81,7 +71,14 @@ public class SelectedCardLogic : MonoBehaviour
             groupOfMge.gameObject.SetActive(false);
             groupOfFurry.gameObject.SetActive(true);
         }
+        if(selectedCard!=null)
+        {
+            selectedCard.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn comp);
+            comp.SetSelectedToFalse();
+            selectedCard=null;
+        }
     }
+
     private void SaveSelectedCardToSaveManager()
     {
         List<UnitSO> list = new List<UnitSO>();
@@ -91,15 +88,25 @@ public class SelectedCardLogic : MonoBehaviour
         {
             if (card.TryGetComponent<ContainerForCardPosition>(out ContainerForCardPosition cardContainer))
             {
-                CardPrefDataForSpawn cardData = cardContainer.currentCard.GetComponent<CardPrefDataForSpawn>();
+                if (cardContainer.currentCard == null)
+                    continue;
+                if (cardContainer.currentCard.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn cardPrefData))
+                {
+                    CardPrefDataForSpawn cardData = cardPrefData;
 
-                list.Add(cardData.cardData);
+                    list.Add(cardData.cardData);
+                }
             }
             else if (card.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero container))
             {
-                CardPrefDataForSpawn cardData = container.currentCard.GetComponent<CardPrefDataForSpawn>();
+                if (container.cardObject == null)
+                    continue;
+                if (container.cardObject.TryGetComponent<CardPrefDataForSpawn>(out CardPrefDataForSpawn cardPrefData))
+                {
+                    CardPrefDataForSpawn cardData = cardPrefData;
 
-                hero = cardData.heroeSO;
+                    hero = cardData.heroeSO;
+                }
             }
         }
         SaveSelectedCardsToGame.Instance.SaveSelectedCards(list, hero);

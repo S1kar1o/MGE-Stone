@@ -7,7 +7,9 @@ public class MenuSceneUIController : MonoBehaviour
 {
     [SerializeField] private Button deckButton;
     [SerializeField] private Button startBattleButton;
+    [SerializeField] private Button toCardShopSceneButton;
     [SerializeField] private string deckSceneName;
+    [SerializeField] private string shopScene;
     private void Start()
     {
         deckButton.onClick.AddListener(() =>
@@ -17,6 +19,10 @@ public class MenuSceneUIController : MonoBehaviour
         startBattleButton.onClick.AddListener(() =>
         {
             PhotonConector.instance.StartBatle();
+        });
+        toCardShopSceneButton.onClick.AddListener(() =>
+        {
+            SceneLoader.Instance.LoadScene(shopScene);
         });
     }
 }

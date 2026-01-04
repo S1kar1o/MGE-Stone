@@ -63,4 +63,8 @@ public class CardPrefDataForSpawn : MonoBehaviour, IPointerClickHandler
 
         }
     }
+    public void SetSelectedToFalse()
+    {
+        IsSelected=false;
+    }
 }

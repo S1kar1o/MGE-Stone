@@ -23,18 +23,14 @@ namespace Assets.Scripts.CardSelectScene
         public void Start()
         {
             loader.loadingCardEnded += Loader_End_Loading_Card;
-            Debug.Log("evvent");
 
         }
 
         private void Loader_End_Loading_Card(object sender, EventArgs e)
         {
-            Debug.Log("evvent");
 
             foreach (UnitDeserialized unit in loader.loadedFurryUnits)
             {
-                Debug.Log(unit.ToString()+"furry");
-                Debug.Log(unit.Id);
 
                 if (unit.Id != 0)
                 {
@@ -47,8 +43,6 @@ namespace Assets.Scripts.CardSelectScene
             }
             foreach (UnitDeserialized unit in loader.loadedMGEUnits)
             {
-                Debug.Log(unit.ToString() + "MGE");
-                Debug.Log(unit.Id);
 
                 if (unit.Id != 0)
                 {
@@ -56,31 +50,25 @@ namespace Assets.Scripts.CardSelectScene
                 }
                 else
                 {
-                    Debug.Log(unit.Id + 12);
-
                     SetCardToMeasureOfCard(unit.Card);
                 }
             } 
             foreach (HeroDeserialized unit in loader.loadedMGEHeroes)
             {
-                Debug.Log(unit.ToString()+"furry");
-
                 if (unit.isSelected)
                 {
                     SetHeroToSelectedParent(unit.Hero);
                 }
                 else
                 {
-                    SetHeroToSelectedParent(unit.Hero);
+                    SetCardToHeroesPanelParent(unit.Hero);
                 }
             }
             foreach (HeroDeserialized unit in loader.loadedFurryHeroes)
             {
-                Debug.Log(unit.ToString() + "MGE");
-
                 if (unit.isSelected)
                 {
-                    SetCardToHeroesPanelParent(unit.Hero);
+                    SetHeroToSelectedParent(unit.Hero);
                 }
                 else
                 {
@@ -88,41 +76,57 @@ namespace Assets.Scripts.CardSelectScene
                 }
             }
         }
+        private void SetHeroToSelectedParent(HeroesSO heroData)
+        {
+            
+            if (heroData.Fraction == Fraction.MGE)
+            {
+                if (MGE_Heroes_Container.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero cardContainer))
+                {
+                    cardContainer.SetCartAfterLoading(SpawnCardObject,heroData);
+                }
+            }
+            else
+            {
+                if (Furry_Heroes_Container.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero cardContainer))
+                {
+                    cardContainer.SetCartAfterLoading(SpawnCardObject,heroData);
+                }
+            }
+        }
 
         private void SetCardToMeasureOfCard(UnitSO cardData)
         {
             Transform card = Instantiate(SpawnCardObject);
-            Debug.Log(card.name+12);
             if (cardData.Fraction == Fraction.MGE)
             {
-                card.SetParent(SelectedCardLogic.Instance.mgeUnitsGroup);
-                Debug.Log(card.name + 12);
+                card.SetParent(SelectedCardLogic.Instance.mgeUnitsGroup,false);
             }
             else
-                card.SetParent(SelectedCardLogic.Instance.furryUnitsGroup);
+                card.SetParent(SelectedCardLogic.Instance.furryUnitsGroup,false);
 
             if (card.TryGetComponent<CardPrefDataForSpawn>(out var cardPrefDataForSpawn))
             {
                 cardPrefDataForSpawn.InitializeUnit(cardData);
-                Debug.Log(card.name + 12);
 
             }
 
-        } private void SetCardToHeroesPanelParent(HeroesSO cardData)
+        } 
+        private void SetCardToHeroesPanelParent(HeroesSO cardData)
         {
+
             Transform card = Instantiate(SpawnCardObject);
             if (cardData.Fraction == Fraction.MGE)
             {
-                card.SetParent(SelectedCardLogic.Instance.mgeHeroesGroup);
+                card.SetParent(SelectedCardLogic.Instance.mgeHeroesGroup,false);
             }
             else
-                card.SetParent(SelectedCardLogic.Instance.furryHeroesGroup);
-
+            {
+                card.SetParent(SelectedCardLogic.Instance.furryHeroesGroup,false);
+            }
             if (card.TryGetComponent<CardPrefDataForSpawn>(out var cardPrefDataForSpawn))
             {
                 cardPrefDataForSpawn.InitializeHero(cardData);
-                Debug.Log(card.name + 12);
-
             }
 
         }
@@ -131,7 +135,7 @@ namespace Assets.Scripts.CardSelectScene
             Transform card = Instantiate(SpawnCardObject);
             if (cardData.Fraction == Fraction.MGE)
             {
-                card.SetParent(MGE_postition[i - 1]);
+                card.SetParent(MGE_postition[i - 1],false);
                 if (MGE_postition[i - 1].TryGetComponent<ContainerForCardPosition>(out ContainerForCardPosition cardContainer))
                 {
                     cardContainer.SetSelectedCard(card);
@@ -139,31 +143,10 @@ namespace Assets.Scripts.CardSelectScene
             }
             else
             {
-                card.SetParent(FURRY_postition[i - 1]);
+                card.SetParent(FURRY_postition[i - 1], false);
                 if (FURRY_postition[i - 1].TryGetComponent<ContainerForCardPosition>(out ContainerForCardPosition cardContainer))
                 {
                     cardContainer.SetSelectedCard(card);
-                }
-            }
-        }
-        private void SetHeroToSelectedParent(HeroesSO heroData)
-        {
-            Transform card = Instantiate(SpawnCardObject);
-            if (heroData.Fraction == Fraction.MGE)
-            {
-
-                Transform fatherTransform = SelectedCardLogic.Instance.groupOfMge.GetChild(0) as Transform; 
-                if (fatherTransform.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero cardContainer))
-                {
-                    cardContainer.SetCardPosAndParentThisObject(card);
-                }
-            }
-            else
-            {
-                Transform fatherTransform = SelectedCardLogic.Instance.groupOfFurry.GetChild(0) as Transform;
-                if (fatherTransform.TryGetComponent<ContainerForSelectHero>(out ContainerForSelectHero cardContainer))
-                {
-                    cardContainer.SetCardPosAndParentThisObject(card);
                 }
             }
         }
